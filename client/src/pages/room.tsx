@@ -53,6 +53,19 @@ export default function Room() {
     }
 
     if (roomData && !participant) {
+      // Check if participant is stored in sessionStorage
+      const storedParticipantId = sessionStorage.getItem(`participant_${roomId}`);
+      const storedParticipantName = sessionStorage.getItem(`participant_name_${roomId}`);
+      
+      if (storedParticipantId && storedParticipantName && roomData && 'participants' in roomData) {
+        // Find existing participant in room data
+        const existingParticipant = (roomData as any).participants.find((p: any) => p.id === storedParticipantId);
+        if (existingParticipant) {
+          setParticipant(existingParticipant);
+          return;
+        }
+      }
+      
       const urlParams = new URLSearchParams(window.location.search);
       const isCreator = urlParams.get("creator") === "true";
       
@@ -78,6 +91,11 @@ export default function Room() {
       const newParticipant = await response.json();
       setParticipant(newParticipant);
       setShowJoinModal(false);
+      
+      // Store participant info in sessionStorage to prevent duplicates on refresh
+      sessionStorage.setItem(`participant_${roomId}`, newParticipant.id);
+      sessionStorage.setItem(`participant_name_${roomId}`, newParticipant.name);
+      
       toast({
         title: "Joined Room",
         description: `Welcome to the planning session, ${name}!`,
