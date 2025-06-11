@@ -268,10 +268,26 @@ function getMostCommon(votes: string[]): string {
 }
 
 function parseVoteValue(value: string): number {
-  if (value === '?' || value === 'XS' || value === 'S' || value === 'M' || value === 'L' || value === 'XL' || value === 'XXL') {
-    return 0; // Non-numeric values
+  if (value === '?') {
+    return 0; // Unknown values
   }
-  return parseFloat(value);
+  
+  // Handle T-shirt sizes with numeric mapping
+  const tshirtMap: Record<string, number> = {
+    'XS': 1,
+    'S': 2,
+    'M': 3,
+    'L': 4,
+    'XL': 5,
+    'XXL': 6
+  };
+  
+  if (tshirtMap[value]) {
+    return tshirtMap[value];
+  }
+  
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function calculateAverage(votes: string[]): string {

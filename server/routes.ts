@@ -13,16 +13,15 @@ function generateRoomId(): string {
   return result;
 }
 
-const VOTING_SYSTEMS = {
+const DEFAULT_VOTING_SYSTEMS = {
   fibonacci: ['1', '2', '3', '5', '8', '13', '21', '?'],
   tshirt: ['XS', 'S', 'M', 'L', 'XL', 'XXL', '?'],
   custom: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '?']
 };
 
-const TIME_UNITS = {
-  hours: ['0.5', '1', '2', '4', '8', '16', '32', '?'],
-  days: ['0.5', '1', '2', '3', '5', '8', '?'],
-  minutes: ['15', '30', '60', '120', '240', '480', '?']
+const DEFAULT_TIME_UNITS = {
+  hours: ['1', '2', '4', '8', '12', '16', '20', '24', '32', '40', '?'],
+  days: ['0.5', '1', '1.5', '2', '2.5', '3', '5', '?']
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -36,8 +35,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeUnits: req.body.timeUnits || "hours",
         dualVoting: req.body.dualVoting ?? true,
         autoReveal: req.body.autoReveal ?? false,
-        storyPointValues: VOTING_SYSTEMS[req.body.votingSystem as keyof typeof VOTING_SYSTEMS] || VOTING_SYSTEMS.fibonacci,
-        timeValues: TIME_UNITS[req.body.timeUnits as keyof typeof TIME_UNITS] || TIME_UNITS.hours,
+        storyPointValues: req.body.storyPointValues || DEFAULT_VOTING_SYSTEMS[req.body.votingSystem as keyof typeof DEFAULT_VOTING_SYSTEMS] || DEFAULT_VOTING_SYSTEMS.fibonacci,
+        timeValues: req.body.timeValues || DEFAULT_TIME_UNITS[req.body.timeUnits as keyof typeof DEFAULT_TIME_UNITS] || DEFAULT_TIME_UNITS.hours,
         currentRound: 1,
         currentDescription: "",
         isRevealed: false
@@ -192,14 +191,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const updates: Partial<typeof room> = {};
       
-      if (req.body.votingSystem && VOTING_SYSTEMS[req.body.votingSystem as keyof typeof VOTING_SYSTEMS]) {
+      if (req.body.votingSystem && DEFAULT_VOTING_SYSTEMS[req.body.votingSystem as keyof typeof DEFAULT_VOTING_SYSTEMS]) {
         updates.votingSystem = req.body.votingSystem;
-        updates.storyPointValues = VOTING_SYSTEMS[req.body.votingSystem as keyof typeof VOTING_SYSTEMS];
+        updates.storyPointValues = DEFAULT_VOTING_SYSTEMS[req.body.votingSystem as keyof typeof DEFAULT_VOTING_SYSTEMS];
       }
       
-      if (req.body.timeUnits && TIME_UNITS[req.body.timeUnits as keyof typeof TIME_UNITS]) {
+      if (req.body.timeUnits && DEFAULT_TIME_UNITS[req.body.timeUnits as keyof typeof DEFAULT_TIME_UNITS]) {
         updates.timeUnits = req.body.timeUnits;
-        updates.timeValues = TIME_UNITS[req.body.timeUnits as keyof typeof TIME_UNITS];
+        updates.timeValues = DEFAULT_TIME_UNITS[req.body.timeUnits as keyof typeof DEFAULT_TIME_UNITS];
       }
       
       if (typeof req.body.dualVoting === 'boolean') {
@@ -237,10 +236,26 @@ function getMostCommon(votes: string[]): string {
 }
 
 function parseVoteValue(value: string): number {
-  if (value === '?' || value === 'XS' || value === 'S' || value === 'M' || value === 'L' || value === 'XL' || value === 'XXL') {
-    return 0; // Non-numeric values
+  if (value === '?') {
+    return 0; // Unknown values
   }
-  return parseFloat(value);
+  
+  // Handle T-shirt sizes with numeric mapping
+  const tshirtMap: Record<string, number> = {
+    'XS': 1,
+    'S': 2,
+    'M': 3,
+    'L': 4,
+    'XL': 5,
+    'XXL': 6
+  };
+  
+  if (tshirtMap[value]) {
+    return tshirtMap[value];
+  }
+  
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
 }
 
 function calculateAverage(votes: string[]): string {

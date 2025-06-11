@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,9 +16,12 @@ import { Club } from "lucide-react";
 
 interface RoomSettings {
   name: string;
-  votingSystem: string;
+  voteForStoryPoints: boolean;
+  voteForTime: boolean;
+  storyPointsSystem: string;
+  storyPointsValues: string;
   timeUnits: string;
-  dualVoting: boolean;
+  timeValues: string;
   autoReveal: boolean;
 }
 
@@ -26,15 +31,32 @@ export default function Home() {
   const [joinRoomId, setJoinRoomId] = useState("");
   const [roomSettings, setRoomSettings] = useState<RoomSettings>({
     name: "Planning Session",
-    votingSystem: "fibonacci",
+    voteForStoryPoints: true,
+    voteForTime: true,
+    storyPointsSystem: "fibonacci",
+    storyPointsValues: "1, 2, 3, 5, 8, 13, 21, ?",
     timeUnits: "hours",
-    dualVoting: true,
+    timeValues: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
     autoReveal: false,
   });
 
   const createRoomMutation = useMutation({
     mutationFn: async (settings: RoomSettings) => {
-      const response = await apiRequest("POST", "/api/rooms", settings);
+      // Convert the new format to the backend format
+      const backendSettings = {
+        name: settings.name,
+        votingSystem: settings.voteForStoryPoints ? settings.storyPointsSystem : "fibonacci",
+        timeUnits: settings.voteForTime ? settings.timeUnits : "hours",
+        dualVoting: settings.voteForStoryPoints && settings.voteForTime,
+        autoReveal: settings.autoReveal,
+        storyPointValues: settings.voteForStoryPoints 
+          ? settings.storyPointsValues.split(',').map(v => v.trim()).filter(v => v)
+          : [],
+        timeValues: settings.voteForTime 
+          ? settings.timeValues.split(',').map(v => v.trim()).filter(v => v)
+          : []
+      };
+      const response = await apiRequest("POST", "/api/rooms", backendSettings);
       return response.json();
     },
     onSuccess: (room) => {
@@ -107,53 +129,122 @@ export default function Home() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="votingSystem">Voting System</Label>
-                <Select
-                  value={roomSettings.votingSystem}
-                  onValueChange={(value) =>
-                    setRoomSettings({ ...roomSettings, votingSystem: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fibonacci">Fibonacci (1, 2, 3, 5, 8, 13, 21, ?)</SelectItem>
-                    <SelectItem value="tshirt">T-Shirt Sizes (XS, S, M, L, XL, XXL, ?)</SelectItem>
-                    <SelectItem value="custom">Custom (1-10, ?)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <div className="space-y-4">
+                <Label className="text-base font-medium">Vote for:</Label>
+                
+                {/* Story Points Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="voteForStoryPoints"
+                      checked={roomSettings.voteForStoryPoints}
+                      onCheckedChange={(checked) =>
+                        setRoomSettings({ ...roomSettings, voteForStoryPoints: !!checked })
+                      }
+                    />
+                    <Label htmlFor="voteForStoryPoints">Story points (complexity)</Label>
+                  </div>
+                  
+                  {roomSettings.voteForStoryPoints && (
+                    <div className="ml-6 space-y-2">
+                      <Label htmlFor="storyPointsSystem" className="text-sm">Voting System</Label>
+                      <Select
+                        value={roomSettings.storyPointsSystem}
+                        onValueChange={(value) => {
+                          let defaultValues = "1, 2, 3, 5, 8, 13, 21, ?";
+                          if (value === "tshirt") {
+                            defaultValues = "XS, S, M, L, XL, XXL, ?";
+                          } else if (value === "custom") {
+                            defaultValues = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?";
+                          }
+                          setRoomSettings({ 
+                            ...roomSettings, 
+                            storyPointsSystem: value,
+                            storyPointsValues: defaultValues
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fibonacci">Fibonacci</SelectItem>
+                          <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
+                          <SelectItem value="custom">Custom</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <div className="space-y-1">
+                        <Label htmlFor="storyPointsValues" className="text-sm text-slate-600">Values</Label>
+                        <Textarea
+                          id="storyPointsValues"
+                          value={roomSettings.storyPointsValues}
+                          onChange={(e) =>
+                            setRoomSettings({ ...roomSettings, storyPointsValues: e.target.value })
+                          }
+                          disabled={roomSettings.storyPointsSystem !== "custom"}
+                          className="h-16 text-sm"
+                          placeholder="Enter values separated by commas"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="timeUnits">Time Units</Label>
-                <Select
-                  value={roomSettings.timeUnits}
-                  onValueChange={(value) =>
-                    setRoomSettings({ ...roomSettings, timeUnits: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hours">Hours</SelectItem>
-                    <SelectItem value="days">Days</SelectItem>
-                    <SelectItem value="minutes">Minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="dualVoting">Dual Voting Mode</Label>
-                <Switch
-                  id="dualVoting"
-                  checked={roomSettings.dualVoting}
-                  onCheckedChange={(checked) =>
-                    setRoomSettings({ ...roomSettings, dualVoting: checked })
-                  }
-                />
+                {/* Time Estimation Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="voteForTime"
+                      checked={roomSettings.voteForTime}
+                      onCheckedChange={(checked) =>
+                        setRoomSettings({ ...roomSettings, voteForTime: !!checked })
+                      }
+                    />
+                    <Label htmlFor="voteForTime">Time</Label>
+                  </div>
+                  
+                  {roomSettings.voteForTime && (
+                    <div className="ml-6 space-y-2">
+                      <Label htmlFor="timeUnits" className="text-sm">Time Units</Label>
+                      <Select
+                        value={roomSettings.timeUnits}
+                        onValueChange={(value) => {
+                          let defaultValues = "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?";
+                          if (value === "days") {
+                            defaultValues = "0.5, 1, 1.5, 2, 2.5, 3, 5, ?";
+                          }
+                          setRoomSettings({ 
+                            ...roomSettings, 
+                            timeUnits: value,
+                            timeValues: defaultValues
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hours">Hours</SelectItem>
+                          <SelectItem value="days">Days</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      <div className="space-y-1">
+                        <Label htmlFor="timeValues" className="text-sm text-slate-600">Values</Label>
+                        <Textarea
+                          id="timeValues"
+                          value={roomSettings.timeValues}
+                          onChange={(e) =>
+                            setRoomSettings({ ...roomSettings, timeValues: e.target.value })
+                          }
+                          className="h-16 text-sm"
+                          placeholder="Enter values separated by commas"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between">
@@ -170,7 +261,7 @@ export default function Home() {
               <Button
                 onClick={handleCreateRoom}
                 className="w-full"
-                disabled={createRoomMutation.isPending}
+                disabled={createRoomMutation.isPending || (!roomSettings.voteForStoryPoints && !roomSettings.voteForTime)}
               >
                 {createRoomMutation.isPending ? "Creating..." : "Create Room"}
               </Button>
