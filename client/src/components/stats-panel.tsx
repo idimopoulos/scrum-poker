@@ -11,6 +11,7 @@ interface StatsPanelProps {
   history: VotingHistory[];
   participants: Participant[];
   votingProgress: number;
+  currentParticipant: Participant | null;
 }
 
 export default function StatsPanel({ 

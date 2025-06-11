@@ -7,6 +7,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Share, Settings, Eye, ArrowRight } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -26,6 +28,8 @@ export default function Room() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [autoReveal, setAutoReveal] = useState(false);
+  const [nextRoundDescription, setNextRoundDescription] = useState("");
+  const [clearDescriptionOnNextRound, setClearDescriptionOnNextRound] = useState(true);
 
   const { data: roomData, isLoading, error } = useQuery({
     queryKey: [`/api/rooms/${roomId}`],
@@ -96,7 +100,10 @@ export default function Room() {
   };
 
   const handleNextRound = () => {
-    nextRound();
+    nextRound(nextRoundDescription);
+    if (clearDescriptionOnNextRound) {
+      setNextRoundDescription("");
+    }
   };
 
   const handleAutoRevealChange = async (checked: boolean) => {
@@ -259,31 +266,61 @@ export default function Room() {
                   />
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-4 border-t border-slate-200">
-                    <div className="flex items-center space-x-4 mb-3 sm:mb-0">
-                      <Button onClick={handleRevealVotes} disabled={room.isRevealed}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        Reveal Cards
-                      </Button>
-                      <div className="flex items-center space-x-2">
-                        <Switch
-                          id="auto-reveal"
-                          checked={autoReveal}
-                          onCheckedChange={handleAutoRevealChange}
-                        />
-                        <Label htmlFor="auto-reveal" className="text-sm text-slate-600">
-                          Auto-reveal when all voted
-                        </Label>
+                  <div className="pt-4 border-t border-slate-200 space-y-4">
+                    {/* Admin Controls - Only for room creator */}
+                    {participant?.isCreator && (
+                      <div className="flex flex-col space-y-3">
+                        <div className="flex items-center space-x-4">
+                          <Button onClick={handleRevealVotes} disabled={room.isRevealed}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Reveal Cards
+                          </Button>
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              id="auto-reveal"
+                              checked={autoReveal}
+                              onCheckedChange={handleAutoRevealChange}
+                            />
+                            <Label htmlFor="auto-reveal" className="text-sm text-slate-600">
+                              Auto-reveal when all voted
+                            </Label>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col sm:flex-row sm:items-end space-y-2 sm:space-y-0 sm:space-x-3">
+                          <div className="flex-1">
+                            <Label htmlFor="task-description" className="text-sm text-slate-600">
+                              Task Description (optional)
+                            </Label>
+                            <Input
+                              id="task-description"
+                              value={nextRoundDescription}
+                              onChange={(e) => setNextRoundDescription(e.target.value)}
+                              placeholder="Enter task description for next round"
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="clear-description"
+                              checked={clearDescriptionOnNextRound}
+                              onCheckedChange={(checked) => setClearDescriptionOnNextRound(!!checked)}
+                            />
+                            <Label htmlFor="clear-description" className="text-sm text-slate-600">
+                              Clear description on next round
+                            </Label>
+                          </div>
+                          <Button 
+                            onClick={handleNextRound}
+                            variant="outline"
+                            className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                          >
+                            Next Round
+                            <ArrowRight className="h-4 w-4 ml-2" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                    <Button 
-                      onClick={handleNextRound}
-                      variant="outline"
-                      className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                    >
-                      Next Round
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -306,6 +343,7 @@ export default function Room() {
                 history={history}
                 participants={participants}
                 votingProgress={votingProgress}
+                currentParticipant={participant}
               />
             </div>
           </div>

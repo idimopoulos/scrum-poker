@@ -3,6 +3,91 @@ import { Check, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Participant, Vote } from "@shared/schema";
 
+// Voting Statistics Component
+interface VotingStatisticsProps {
+  votes: Vote[];
+  isRevealed: boolean;
+  dualVoting: boolean;
+}
+
+function VotingStatistics({ votes, isRevealed, dualVoting }: VotingStatisticsProps) {
+  const calculateStats = (values: string[]) => {
+    if (values.length === 0 || !isRevealed) {
+      return { avg: "-", min: "-", max: "-" };
+    }
+
+    // Filter out non-numeric values for calculation
+    const numericValues = values.map(v => {
+      if (v === "?") return 0;
+      // Handle T-shirt sizes
+      const tshirtMap: Record<string, number> = {
+        'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6
+      };
+      if (tshirtMap[v]) return tshirtMap[v];
+      const parsed = parseFloat(v);
+      return isNaN(parsed) ? 0 : parsed;
+    }).filter(v => v > 0);
+
+    if (numericValues.length === 0) {
+      return { avg: "-", min: "-", max: "-" };
+    }
+
+    const avg = (numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length).toFixed(1);
+    const min = Math.min(...numericValues).toString();
+    const max = Math.max(...numericValues).toString();
+
+    return { avg, min, max };
+  };
+
+  const storyPointVotes = votes.filter(v => v.storyPoints).map(v => v.storyPoints!);
+  const timeVotes = votes.filter(v => v.timeEstimate).map(v => v.timeEstimate!);
+
+  const storyStats = calculateStats(storyPointVotes);
+  const timeStats = calculateStats(timeVotes);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <h4 className="text-sm font-medium text-slate-700 mb-2">Story points</h4>
+        <div className="grid grid-cols-3 gap-4 text-center text-xs">
+          <div>
+            <div className="text-slate-500 mb-1">Avg</div>
+            <div className="font-medium text-slate-700">{storyStats.avg}</div>
+          </div>
+          <div>
+            <div className="text-slate-500 mb-1">Min</div>
+            <div className="font-medium text-slate-700">{storyStats.min}</div>
+          </div>
+          <div>
+            <div className="text-slate-500 mb-1">Max</div>
+            <div className="font-medium text-slate-700">{storyStats.max}</div>
+          </div>
+        </div>
+      </div>
+
+      {dualVoting && (
+        <div>
+          <h4 className="text-sm font-medium text-slate-700 mb-2">Time</h4>
+          <div className="grid grid-cols-3 gap-4 text-center text-xs">
+            <div>
+              <div className="text-slate-500 mb-1">Avg</div>
+              <div className="font-medium text-slate-700">{timeStats.avg}</div>
+            </div>
+            <div>
+              <div className="text-slate-500 mb-1">Min</div>
+              <div className="font-medium text-slate-700">{timeStats.min}</div>
+            </div>
+            <div>
+              <div className="text-slate-500 mb-1">Max</div>
+              <div className="font-medium text-slate-700">{timeStats.max}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ParticipantsPanelProps {
   participants: Participant[];
   votes: Vote[];
@@ -114,17 +199,24 @@ export default function ParticipantsPanel({
             );
           })}
         </div>
-        <div className="mt-4 text-sm text-slate-600 text-center">
+        <div className="mt-4 text-sm text-slate-600">
           <div className="flex items-center justify-between mb-2">
             <span>Voting Progress</span>
             <span>{votingProgress}%</span>
           </div>
-          <div className="w-full bg-slate-200 rounded-full h-2">
+          <div className="w-full bg-slate-200 rounded-full h-2 mb-4">
             <div 
               className="bg-primary h-2 rounded-full transition-all duration-300"
               style={{ width: `${votingProgress}%` }}
             />
           </div>
+          
+          {/* Voting Statistics */}
+          <VotingStatistics 
+            votes={votes} 
+            isRevealed={isRevealed} 
+            dualVoting={dualVoting} 
+          />
         </div>
       </CardContent>
     </Card>
