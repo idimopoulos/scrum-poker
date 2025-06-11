@@ -28,7 +28,7 @@ export default function Room() {
   const [autoReveal, setAutoReveal] = useState(false);
 
   const { data: roomData, isLoading, error } = useQuery({
-    queryKey: ["/api/rooms", roomId],
+    queryKey: [`/api/rooms/${roomId}`],
     enabled: !!roomId,
   });
 
