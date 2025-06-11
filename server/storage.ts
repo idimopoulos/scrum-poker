@@ -39,7 +39,17 @@ export class MemStorage implements IStorage {
   // Room operations
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
     const room: Room = {
-      ...insertRoom,
+      id: insertRoom.id,
+      name: insertRoom.name,
+      votingSystem: insertRoom.votingSystem || "fibonacci",
+      timeUnits: insertRoom.timeUnits || "hours",
+      dualVoting: insertRoom.dualVoting ?? true,
+      autoReveal: insertRoom.autoReveal ?? false,
+      storyPointValues: [...(insertRoom.storyPointValues || [])],
+      timeValues: [...(insertRoom.timeValues || [])],
+      currentRound: insertRoom.currentRound || 1,
+      currentDescription: insertRoom.currentDescription || null,
+      isRevealed: insertRoom.isRevealed ?? false,
       createdAt: new Date(),
     };
     this.rooms.set(room.id, room);
@@ -63,8 +73,10 @@ export class MemStorage implements IStorage {
   async createParticipant(insertParticipant: InsertParticipant): Promise<Participant> {
     const id = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const participant: Participant = {
-      ...insertParticipant,
       id,
+      roomId: insertParticipant.roomId,
+      name: insertParticipant.name,
+      isCreator: insertParticipant.isCreator ?? false,
       joinedAt: new Date(),
     };
     this.participants.set(id, participant);
@@ -109,8 +121,12 @@ export class MemStorage implements IStorage {
       // Create new vote
       const id = this.currentVoteId++;
       const vote: Vote = {
-        ...insertVote,
         id,
+        roomId: insertVote.roomId,
+        participantId: insertVote.participantId,
+        round: insertVote.round,
+        storyPoints: insertVote.storyPoints ?? null,
+        timeEstimate: insertVote.timeEstimate ?? null,
         votedAt: new Date(),
       };
       this.votes.set(id, vote);
@@ -132,8 +148,18 @@ export class MemStorage implements IStorage {
   async createVotingHistory(insertHistory: InsertVotingHistory): Promise<VotingHistory> {
     const id = this.currentHistoryId++;
     const history: VotingHistory = {
-      ...insertHistory,
       id,
+      roomId: insertHistory.roomId,
+      round: insertHistory.round,
+      description: insertHistory.description ?? null,
+      storyPointsConsensus: insertHistory.storyPointsConsensus ?? null,
+      timeEstimateConsensus: insertHistory.timeEstimateConsensus ?? null,
+      storyPointsAvg: insertHistory.storyPointsAvg ?? null,
+      storyPointsMin: insertHistory.storyPointsMin ?? null,
+      storyPointsMax: insertHistory.storyPointsMax ?? null,
+      timeEstimateAvg: insertHistory.timeEstimateAvg ?? null,
+      timeEstimateMin: insertHistory.timeEstimateMin ?? null,
+      timeEstimateMax: insertHistory.timeEstimateMax ?? null,
       completedAt: new Date(),
     };
     this.votingHistory.set(id, history);

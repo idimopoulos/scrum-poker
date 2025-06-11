@@ -20,7 +20,10 @@ const clients = new Map<string, ClientConnection>();
 const roomClients = new Map<string, Set<string>>();
 
 export function setupWebSocket(server: Server) {
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ 
+    server,
+    path: '/api/ws' // Use a specific path to avoid conflicts with Vite
+  });
 
   wss.on('connection', (ws) => {
     const clientId = generateClientId();

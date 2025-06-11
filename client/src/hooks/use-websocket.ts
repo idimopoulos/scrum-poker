@@ -23,7 +23,7 @@ export function useWebSocket(roomId: string | null, participantId: string | null
     if (!roomId || !participantId) return;
 
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = `${protocol}//${window.location.host}/api/ws`;
     
     const ws = new WebSocketClient(wsUrl);
     wsRef.current = ws;
