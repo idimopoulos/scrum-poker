@@ -19,7 +19,8 @@ export default function StatsPanel({
   votes, 
   history, 
   participants, 
-  votingProgress 
+  votingProgress,
+  currentParticipant 
 }: StatsPanelProps) {
   const getCurrentStats = () => {
     if (votes.length === 0) {
@@ -143,46 +144,47 @@ export default function StatsPanel({
         </CardContent>
       </Card>
 
-      {/* Room Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-semibold text-slate-800 uppercase tracking-wide">
-            Room Settings
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div>
-            <Label className="text-xs text-slate-600 block mb-1">Voting System</Label>
-            <Select value={room.votingSystem} disabled>
-              <SelectTrigger className="text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="fibonacci">Fibonacci</SelectItem>
-                <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
-                <SelectItem value="custom">Custom</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs text-slate-600 block mb-1">Time Units</Label>
-            <Select value={room.timeUnits} disabled>
-              <SelectTrigger className="text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="hours">Hours</SelectItem>
-                <SelectItem value="days">Days</SelectItem>
-                <SelectItem value="minutes">Minutes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex items-center justify-between">
-            <Label className="text-xs text-slate-600">Dual Voting Mode</Label>
-            <Switch checked={room.dualVoting} disabled />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Room Settings - Only for administrators */}
+      {currentParticipant?.isCreator && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm font-semibold text-slate-800 uppercase tracking-wide">
+              Room Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <Label className="text-xs text-slate-600 block mb-1">Voting System</Label>
+              <Select value={room.votingSystem} disabled>
+                <SelectTrigger className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fibonacci">Fibonacci</SelectItem>
+                  <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 block mb-1">Time Units</Label>
+              <Select value={room.timeUnits} disabled>
+                <SelectTrigger className="text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="hours">Hours</SelectItem>
+                  <SelectItem value="days">Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs text-slate-600">Dual Voting Mode</Label>
+              <Switch checked={room.dualVoting} disabled />
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
