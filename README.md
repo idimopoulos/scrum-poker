@@ -50,21 +50,150 @@ A collaborative Scrum poker web application for agile teams to estimate story po
    npm start
    ```
 
-## Docker Deployment
+## Production Deployment
 
-### Building the Image
+### Automated Deployment with GitHub Actions
+
+The repository includes automated deployment workflows for seamless CI/CD.
+
+#### Prerequisites
+
+1. **Docker Hub Account**: Create an account at [hub.docker.com](https://hub.docker.com)
+2. **Server Setup**: Ubuntu/Debian server with Docker and Docker Compose installed
+3. **Domain**: Point your domain to your server's IP address
+
+#### GitHub Repository Secrets
+
+Configure these secrets in your GitHub repository (Settings → Secrets and variables → Actions):
+
+```
+DOCKER_USERNAME=your-dockerhub-username
+DOCKER_PASSWORD=your-dockerhub-password
+SERVER_HOST=your-server-ip-or-domain
+SERVER_USER=your-server-username
+SERVER_SSH_KEY=your-private-ssh-key
+```
+
+#### Server Setup
+
+1. **Install Docker and Docker Compose:**
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin -y
+
+# Reboot to apply group changes
+sudo reboot
+```
+
+2. **Clone repository on server:**
+```bash
+sudo mkdir -p /opt/scrum-poker
+sudo chown $USER:$USER /opt/scrum-poker
+cd /opt/scrum-poker
+git clone https://github.com/your-username/your-repo-name .
+```
+
+3. **Set up reverse proxy (Nginx):**
+```bash
+# Install Nginx
+sudo apt install nginx -y
+
+# Create site configuration
+sudo tee /etc/nginx/sites-available/scrum-poker << 'EOF'
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        proxy_read_timeout 86400;
+    }
+}
+EOF
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/scrum-poker /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl enable nginx
+sudo systemctl restart nginx
+```
+
+4. **Set up SSL with Let's Encrypt:**
+```bash
+# Install Certbot
+sudo apt install certbot python3-certbot-nginx -y
+
+# Get SSL certificate
+sudo certbot --nginx -d your-domain.com
+
+# Set up auto-renewal
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+5. **Configure firewall:**
+```bash
+sudo ufw allow 22    # SSH
+sudo ufw allow 80    # HTTP
+sudo ufw allow 443   # HTTPS
+sudo ufw enable
+```
+
+#### Deployment Process
+
+Once configured, deployment is automatic:
+
+1. **Push to main branch** triggers the deployment workflow
+2. **Manual deployment** via GitHub Actions tab → "Deploy to Server" → "Run workflow"
+
+The workflow:
+- Builds Docker image and pushes to Docker Hub
+- SSHs to your server and pulls latest code
+- Updates and restarts containers
+- Verifies deployment health
+
+### Manual Docker Deployment
+
+#### Building the Image
 
 ```bash
 docker build -t scrum-poker .
 ```
 
-### Running with Docker
+#### Running with Docker
 
 ```bash
 docker run -p 5000:5000 scrum-poker
 ```
 
-### Using Docker Compose
+#### Using Docker Compose
+
+```bash
+# Start application
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop application
+docker-compose down
+```
 
 The included `docker-compose.yml` provides:
 - Application container with health checks
