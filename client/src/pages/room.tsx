@@ -285,6 +285,10 @@ export default function Room() {
 
                   {/* Action Buttons */}
                   <div className="pt-4 border-t border-slate-200 space-y-4">
+                    {/* Debug: Show participant info */}
+                    <div className="text-xs text-slate-500 mb-2">
+                      Debug - Participant: {participant?.name}, isCreator: {participant?.isCreator ? 'true' : 'false'}
+                    </div>
                     {/* Admin Controls - Only for room creator */}
                     {participant?.isCreator && (
                       <div className="flex flex-col space-y-3">
