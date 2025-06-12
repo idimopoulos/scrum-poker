@@ -185,7 +185,7 @@ async function handleNextRound(clientId: string, message: NextRoundMessage) {
     await storage.createVotingHistory({
       roomId,
       round: room.currentRound,
-      description: description || room.currentDescription || "",
+      description: room.currentDescription || "",
       storyPointsConsensus: storyPointVotes.length > 0 ? getMostCommon(storyPointVotes) : null,
       timeEstimateConsensus: timeVotes.length > 0 ? getMostCommon(timeVotes) : null,
       storyPointsAvg: storyPointVotes.length > 0 ? calculateAverage(storyPointVotes) : null,
