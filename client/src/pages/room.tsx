@@ -201,7 +201,14 @@ export default function Room() {
   });
 
   const votingProgress = participants.length > 0 
-    ? Math.round((votes.length / participants.length) * 100) 
+    ? Math.round((participants.filter(p => {
+        const vote = votes.find(v => v.participantId === p.id);
+        if (!vote) return false;
+        if (room.dualVoting) {
+          return vote.storyPoints && vote.timeEstimate;
+        }
+        return vote.storyPoints;
+      }).length / participants.length) * 100) 
     : 0;
 
   return (
