@@ -118,26 +118,57 @@ export default function StatsPanel({
                     )}
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="text-center">
-                    <div className="text-slate-500">Avg</div>
-                    <div className="font-medium text-slate-700">
-                      {round.storyPointsAvg || "—"}
+                {/* Story Points Statistics */}
+                <div className="mb-2">
+                  <div className="text-xs text-slate-600 mb-1 font-medium">Story Points</div>
+                  <div className="grid grid-cols-3 gap-2 text-xs">
+                    <div className="text-center">
+                      <div className="text-slate-500">Avg</div>
+                      <div className="font-medium text-slate-700">
+                        {round.storyPointsAvg || "—"}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-slate-500">Min</div>
-                    <div className="font-medium text-slate-700">
-                      {round.storyPointsMin || "—"}
+                    <div className="text-center">
+                      <div className="text-slate-500">Min</div>
+                      <div className="font-medium text-slate-700">
+                        {round.storyPointsMin || "—"}
+                      </div>
                     </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-slate-500">Max</div>
-                    <div className="font-medium text-slate-700">
-                      {round.storyPointsMax || "—"}
+                    <div className="text-center">
+                      <div className="text-slate-500">Max</div>
+                      <div className="font-medium text-slate-700">
+                        {round.storyPointsMax || "—"}
+                      </div>
                     </div>
                   </div>
                 </div>
+                
+                {/* Time Estimates Statistics - Only show if dual voting and data exists */}
+                {room.dualVoting && (round.timeEstimateAvg || round.timeEstimateMin || round.timeEstimateMax) && (
+                  <div>
+                    <div className="text-xs text-slate-600 mb-1 font-medium">Time ({room.timeUnits})</div>
+                    <div className="grid grid-cols-3 gap-2 text-xs">
+                      <div className="text-center">
+                        <div className="text-slate-500">Avg</div>
+                        <div className="font-medium text-slate-700">
+                          {round.timeEstimateAvg || "—"}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-slate-500">Min</div>
+                        <div className="font-medium text-slate-700">
+                          {round.timeEstimateMin || "—"}
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-slate-500">Max</div>
+                        <div className="font-medium text-slate-700">
+                          {round.timeEstimateMax || "—"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))
           )}
