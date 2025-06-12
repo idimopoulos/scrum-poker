@@ -82,10 +82,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Room not found" });
       }
 
+      // Check if this is the first participant (room creator)
+      const existingParticipants = await storage.getParticipantsByRoom(req.params.id);
+      const isCreator = existingParticipants.length === 0;
+
       const participantData = {
         roomId: req.params.id,
         name: req.body.name,
-        isCreator: false
+        isCreator
       };
 
       const validatedParticipant = insertParticipantSchema.parse(participantData);
