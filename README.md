@@ -155,6 +155,24 @@ sudo ufw allow 443   # HTTPS
 sudo ufw enable
 ```
 
+#### Quick Server Setup
+
+Use the automated deployment script:
+
+```bash
+# Make script executable
+chmod +x scripts/deploy-server.sh
+
+# Run setup script
+./scripts/deploy-server.sh your-domain.com
+```
+
+This script automatically:
+- Installs Docker, Docker Compose, Nginx, and Certbot
+- Configures reverse proxy and SSL
+- Sets up firewall rules
+- Generates SSL certificate
+
 #### Deployment Process
 
 Once configured, deployment is automatic:
@@ -239,11 +257,103 @@ Room creators have exclusive access to:
 - `POST /api/rooms/:id/join` - Join room as participant
 - `WebSocket` - Real-time updates and voting
 
+## Troubleshooting
+
+### Common Issues
+
+#### GitHub Actions Deployment Fails
+
+**Issue**: Build or deployment fails in GitHub Actions
+**Solutions**:
+- Verify all repository secrets are correctly set
+- Check Docker Hub credentials and repository permissions
+- Ensure server SSH key is in OpenSSH format (not PuTTY)
+- Verify server firewall allows SSH connections
+
+#### WebSocket Connection Issues
+
+**Issue**: Real-time features not working
+**Solutions**:
+- Check proxy configuration includes WebSocket headers
+- Verify `proxy_read_timeout` is set to handle long connections
+- Ensure firewall allows traffic on configured ports
+
+#### SSL Certificate Problems
+
+**Issue**: HTTPS not working or certificate errors
+**Solutions**:
+```bash
+# Check certificate status
+sudo certbot certificates
+
+# Renew certificates manually
+sudo certbot renew
+
+# Test renewal process
+sudo certbot renew --dry-run
+```
+
+#### Application Not Starting
+
+**Issue**: Docker containers fail to start
+**Solutions**:
+```bash
+# Check container logs
+docker-compose logs -f
+
+# Restart containers
+docker-compose down && docker-compose up -d
+
+# Check system resources
+docker system df
+docker system prune -f
+```
+
+#### Database Connection Issues
+
+**Issue**: If switching to PostgreSQL database
+**Solutions**:
+- Uncomment PostgreSQL service in `docker-compose.yml`
+- Update environment variables for database connection
+- Ensure database initialization completes before app starts
+
+### Monitoring
+
+#### Check Application Health
+
+```bash
+# Container status
+docker-compose ps
+
+# Resource usage
+docker stats
+
+# Application logs
+docker-compose logs -f app
+
+# Nginx logs
+sudo tail -f /var/log/nginx/access.log
+sudo tail -f /var/log/nginx/error.log
+```
+
+#### Performance Optimization
+
+```bash
+# Clean up Docker resources
+docker system prune -a
+
+# Monitor system resources
+htop
+df -h
+free -h
+```
+
 ## Development
 
 ### Project Structure
 
 ```
+├── .github/workflows/   # CI/CD workflows
 ├── client/src/          # React frontend
 │   ├── components/      # UI components
 │   ├── pages/          # Route pages
@@ -251,6 +361,7 @@ Room creators have exclusive access to:
 │   └── lib/            # Utilities
 ├── server/             # Express backend
 ├── shared/             # Shared types and schemas
+├── scripts/            # Deployment scripts
 └── docker-compose.yml  # Container orchestration
 ```
 
@@ -260,6 +371,14 @@ Room creators have exclusive access to:
 - `npm run build` - Build for production
 - `npm start` - Start production server
 - `npm run check` - TypeScript type checking
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
 ## License
 
