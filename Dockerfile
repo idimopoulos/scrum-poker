@@ -1,5 +1,5 @@
-# Use Node.js 20 Alpine for smaller image size
-FROM node:20-alpine
+# Multi-stage build for production optimization
+FROM node:20-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -7,24 +7,41 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including dev dependencies for build)
+# Install all dependencies for building
 RUN npm ci
 
 # Copy application code
 COPY . .
 
-# Build the frontend first
+# Build the frontend
 RUN npx vite build
 
-# Create dist directory and build server
-RUN mkdir -p dist
-RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
+# Copy static files to a known location
+RUN mkdir -p /app/dist-static && cp -r dist/* /app/dist-static/
 
-# Verify the build output exists
-RUN ls -la dist/
+# Production stage
+FROM node:20-alpine AS production
 
-# Remove dev dependencies after build
-RUN npm prune --production
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --production
+
+# Copy application code (excluding node_modules)
+COPY server ./server
+COPY shared ./shared
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+
+# Copy built frontend from builder stage
+COPY --from=builder /app/dist-static ./dist
+
+# Install tsx for running TypeScript in production
+RUN npm install tsx
 
 # Expose port
 EXPOSE 5000
@@ -45,5 +62,5 @@ USER scrumpoker
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD node -e "require('http').get('http://localhost:5000', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the application
-CMD ["npm", "start"]
+# Start the application using tsx to run TypeScript directly
+CMD ["npx", "tsx", "server/index.ts"]
