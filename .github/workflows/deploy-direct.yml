@@ -1,0 +1,42 @@
+name: Deploy Direct to Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        script: |
+          # Navigate to project directory
+          cd /opt/scrum-poker
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Stop existing containers
+          docker-compose down
+          
+          # Remove old images to force rebuild
+          docker image prune -a -f
+          
+          # Build and start updated containers
+          docker-compose up -d --build
+          
+          # Verify deployment
+          sleep 15
+          if ! curl -f http://localhost:5001 > /dev/null 2>&1; then
+            echo "Deployment verification failed"
+            exit 1
+          fi
+          
+          echo "Deployment successful!"

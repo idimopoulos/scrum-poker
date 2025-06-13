@@ -62,16 +62,25 @@ The repository includes automated deployment workflows for seamless CI/CD.
 2. **Server Setup**: Ubuntu/Debian server with Docker and Docker Compose installed
 3. **Domain**: Point your domain to your server's IP address
 
-#### GitHub Repository Secrets
+#### Deployment Options
 
-Configure these secrets in your GitHub repository (Settings → Secrets and variables → Actions):
+**Option 1: Direct VPS Deployment (Recommended)**
+No Docker Hub required - builds directly on your server.
 
+GitHub repository secrets needed:
 ```
-DOCKER_USERNAME=your-dockerhub-username
-DOCKER_PASSWORD=your-dockerhub-password
 SERVER_HOST=your-server-ip-or-domain
 SERVER_USER=your-server-username
 SERVER_SSH_KEY=your-private-ssh-key
+```
+
+**Option 2: Docker Hub Deployment**
+For distributed deployments or multiple servers.
+
+Additional secrets needed:
+```
+DOCKER_USERNAME=your-dockerhub-username
+DOCKER_PASSWORD=your-dockerhub-password
 ```
 
 #### Server Setup
@@ -175,16 +184,36 @@ This script automatically:
 
 #### Deployment Process
 
-Once configured, deployment is automatic:
+**Option 1: Direct VPS Deployment**
+Use the `deploy-direct.yml` workflow (no Docker Hub needed):
 
-1. **Push to main branch** triggers the deployment workflow
-2. **Manual deployment** via GitHub Actions tab → "Deploy to Server" → "Run workflow"
+1. **Push to main branch** triggers direct deployment
+2. **Manual deployment** via GitHub Actions tab → "Deploy Direct to Server" → "Run workflow"
 
 The workflow:
-- Builds Docker image and pushes to Docker Hub
 - SSHs to your server and pulls latest code
+- Builds Docker image directly on server
 - Updates and restarts containers
 - Verifies deployment health
+
+**Option 2: Manual Local Deployment**
+Run directly on your server:
+
+```bash
+# Clone repository
+cd /opt/scrum-poker
+git pull origin main
+
+# Deploy locally
+./scripts/deploy-local.sh
+```
+
+**Option 3: Docker Hub Deployment**
+Use the `deploy.yml` workflow for distributed deployments:
+
+- Builds Docker image and pushes to Docker Hub
+- SSHs to your server and pulls latest image
+- Updates and restarts containers
 
 ### Manual Docker Deployment
 
