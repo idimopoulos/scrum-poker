@@ -12,6 +12,8 @@ interface RoomState {
 export function useWebSocket(roomId: string | null, participantId: string | null) {
   const wsRef = useRef<WebSocketClient | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [usePolling, setUsePolling] = useState(false);
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [roomState, setRoomState] = useState<RoomState>({
     room: null,
     participants: [],
@@ -46,6 +48,7 @@ export function useWebSocket(roomId: string | null, participantId: string | null
     ws.connect()
       .then(() => {
         setIsConnected(true);
+        setUsePolling(false);
         // Join the room
         ws.send({
           type: 'join_room',
@@ -53,40 +56,99 @@ export function useWebSocket(roomId: string | null, participantId: string | null
         });
       })
       .catch((error) => {
-        console.error('Failed to connect to WebSocket:', error);
+        console.error('WebSocket connection failed, falling back to polling:', error);
         setIsConnected(false);
+        setUsePolling(true);
+        
+        // Start polling as fallback
+        const pollRoom = async () => {
+          try {
+            const response = await fetch(`/api/rooms/${roomId}`);
+            if (response.ok) {
+              const data = await response.json();
+              setRoomState(data);
+            }
+          } catch (error) {
+            console.error('Polling error:', error);
+          }
+        };
+        
+        // Poll every 2 seconds
+        pollRoom();
+        pollingIntervalRef.current = setInterval(pollRoom, 2000);
       });
 
     return () => {
       ws.disconnect();
       setIsConnected(false);
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     };
   }, [roomId, participantId]);
 
-  const sendVote = (storyPoints?: string, timeEstimate?: string) => {
-    if (wsRef.current && roomId && participantId) {
+  const sendVote = async (storyPoints?: string, timeEstimate?: string) => {
+    if (!roomId || !participantId) return;
+
+    if (isConnected && wsRef.current) {
+      // Use WebSocket if connected
       wsRef.current.send({
         type: 'vote',
         payload: { roomId, participantId, storyPoints, timeEstimate }
       });
+    } else if (usePolling) {
+      // Use HTTP API if falling back to polling
+      try {
+        await fetch(`/api/rooms/${roomId}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participantId, storyPoints, timeEstimate })
+        });
+      } catch (error) {
+        console.error('Failed to send vote:', error);
+      }
     }
   };
 
-  const revealVotes = () => {
-    if (wsRef.current && roomId) {
+  const revealVotes = async () => {
+    if (!roomId) return;
+
+    if (isConnected && wsRef.current) {
       wsRef.current.send({
         type: 'reveal_votes',
         payload: { roomId }
       });
+    } else if (usePolling) {
+      try {
+        await fetch(`/api/rooms/${roomId}/reveal`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        console.error('Failed to reveal votes:', error);
+      }
     }
   };
 
-  const nextRound = (description?: string) => {
-    if (wsRef.current && roomId) {
+  const nextRound = async (description?: string) => {
+    if (!roomId) return;
+
+    if (isConnected && wsRef.current) {
       wsRef.current.send({
         type: 'next_round',
         payload: { roomId, description }
       });
+    } else if (usePolling) {
+      try {
+        await fetch(`/api/rooms/${roomId}/next-round`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ description })
+        });
+      } catch (error) {
+        console.error('Failed to start next round:', error);
+      }
     }
   };
 

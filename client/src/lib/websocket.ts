@@ -39,6 +39,9 @@ export class WebSocketClient {
 
         this.ws.onerror = (error) => {
           console.error('WebSocket error:', error);
+          console.error('WebSocket URL:', this.url);
+          console.error('WebSocket readyState:', this.ws?.readyState);
+          console.error('Connection attempt failed - may be reverse proxy or SSL issue');
           reject(error);
         };
       } catch (error) {
