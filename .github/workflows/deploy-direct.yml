@@ -18,7 +18,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           # Navigate to project directory
-          cd /opt/scrum-poker
+          cd /opt/apps/scrum
           
           # Pull latest changes
           git pull origin main
