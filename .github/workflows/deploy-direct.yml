@@ -24,13 +24,13 @@ jobs:
           git pull origin main
           
           # Stop existing containers
-          docker-compose down
+          docker compose down
           
           # Remove old images to force rebuild
           docker image prune -a -f
           
           # Build and start updated containers
-          docker-compose up -d --build
+          docker compose up -d --build
           
           # Verify deployment
           sleep 15
