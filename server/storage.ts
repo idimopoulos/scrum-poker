@@ -39,8 +39,8 @@ export class MemStorage implements IStorage {
   // Room operations
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
     const room: Room = {
-      id: insertRoom.id!,
-      name: insertRoom.name!,
+      id: insertRoom.id,
+      name: insertRoom.name,
       votingSystem: insertRoom.votingSystem || "fibonacci",
       timeUnits: insertRoom.timeUnits || "hours",
       dualVoting: insertRoom.dualVoting ?? true,
