@@ -15,7 +15,7 @@ jobs:
       with:
         host: ${{ secrets.SERVER_HOST }}
         username: ${{ secrets.SERVER_USER }}
-        password: ${{ secrets.SERVER_PASSWORD }}
+        key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           # Navigate to project directory
           cd /opt/apps/scrum
