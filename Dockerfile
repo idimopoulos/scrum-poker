@@ -13,8 +13,11 @@ RUN npm ci
 # Copy application code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Build the frontend first
+RUN npx vite build
+
+# Build the server with correct output path
+RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js
 
 # Remove dev dependencies after build
 RUN npm prune --production
