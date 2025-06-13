@@ -37,8 +37,8 @@ COPY shared ./shared
 COPY vite.config.ts ./
 COPY tsconfig.json ./
 
-# Copy built frontend from builder stage
-COPY --from=builder /app/dist-static ./dist
+# Copy built frontend from builder stage to where server expects it
+COPY --from=builder /app/dist-static ./server/public
 
 # Install tsx for running TypeScript in production
 RUN npm install tsx
