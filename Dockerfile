@@ -16,8 +16,15 @@ COPY . .
 # Build the frontend
 RUN npx vite build
 
-# Copy static files to a known location
-RUN mkdir -p /app/dist-static && cp -r dist/* /app/dist-static/
+# Debug: Check what was built
+RUN ls -la dist/
+
+# Copy static files from the correct location (vite builds to dist/public)
+RUN mkdir -p /app/dist-static
+RUN if [ -d "dist/public" ] && [ "$(ls -A dist/public)" ]; then cp -r dist/public/* /app/dist-static/; else echo "No dist/public directory or empty"; fi
+
+# Debug: Verify copy worked
+RUN ls -la /app/dist-static/
 
 # Production stage
 FROM node:20-alpine AS production
@@ -39,6 +46,9 @@ COPY tsconfig.json ./
 
 # Copy built frontend from builder stage to where server expects it
 COPY --from=builder /app/dist-static ./server/public
+
+# Debug: List contents to verify copy worked
+RUN ls -la ./server/public/
 
 # Install tsx for running TypeScript in production
 RUN npm install tsx
