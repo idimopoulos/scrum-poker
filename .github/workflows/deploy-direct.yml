@@ -26,11 +26,12 @@ jobs:
           # Stop existing containers
           docker compose down
           
-          # Remove old images to force rebuild
-          docker image prune -a -f
+          # Remove old images and containers to force complete rebuild
+          docker system prune -a -f
           
-          # Build and start updated containers
-          docker compose up -d --build
+          # Build and start updated containers with no cache
+          docker compose build --no-cache
+          docker compose up -d
           
           # Verify deployment
           sleep 15
