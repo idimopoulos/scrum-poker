@@ -39,8 +39,8 @@ export class MemStorage implements IStorage {
   // Room operations
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
     const room: Room = {
-      id: insertRoom.id,
-      name: insertRoom.name,
+      id: insertRoom.id!,
+      name: insertRoom.name!,
       votingSystem: insertRoom.votingSystem || "fibonacci",
       timeUnits: insertRoom.timeUnits || "hours",
       dualVoting: insertRoom.dualVoting ?? true,
@@ -74,8 +74,8 @@ export class MemStorage implements IStorage {
     const id = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const participant: Participant = {
       id,
-      roomId: insertParticipant.roomId,
-      name: insertParticipant.name,
+      roomId: insertParticipant.roomId!,
+      name: insertParticipant.name!,
       isCreator: insertParticipant.isCreator ?? false,
       joinedAt: new Date(),
     };
@@ -105,7 +105,7 @@ export class MemStorage implements IStorage {
   async createOrUpdateVote(insertVote: InsertVote): Promise<Vote> {
     // Check if vote already exists for this participant and round
     const existingVote = Array.from(this.votes.values())
-      .find(v => v.participantId === insertVote.participantId && v.round === insertVote.round);
+      .find(v => v.participantId === insertVote.participantId! && v.round === insertVote.round!);
 
     if (existingVote) {
       // Update existing vote

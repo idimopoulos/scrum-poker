@@ -21,7 +21,7 @@ import JoinModal from "@/components/join-modal";
 
 
 export default function Room() {
-  const params = useParams();
+  const params = useParams<{ id: string }>();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const roomId = params.id;

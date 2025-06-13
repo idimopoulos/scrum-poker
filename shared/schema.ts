@@ -53,22 +53,22 @@ export const votingHistory = pgTable("voting_history", {
 
 export const insertRoomSchema = createInsertSchema(rooms).omit({
   createdAt: true,
-});
+} as const);
 
 export const insertParticipantSchema = createInsertSchema(participants).omit({
   id: true,
   joinedAt: true,
-});
+} as const);
 
 export const insertVoteSchema = createInsertSchema(votes).omit({
   id: true,
   votedAt: true,
-});
+} as const);
 
 export const insertVotingHistorySchema = createInsertSchema(votingHistory).omit({
   id: true,
   completedAt: true,
-});
+} as const);
 
 export type Room = typeof rooms.$inferSelect;
 export type InsertRoom = z.infer<typeof insertRoomSchema>;
