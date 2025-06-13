@@ -58,7 +58,7 @@ jobs:
           
           # Verify deployment
           sleep 10
-          if ! curl -f http://localhost:5000 > /dev/null 2>&1; then
+          if ! curl -f http://localhost:5001 > /dev/null 2>&1; then
             echo "Deployment verification failed"
             exit 1
           fi

@@ -113,7 +113,7 @@ server {
     server_name your-domain.com;
 
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5001;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
@@ -197,7 +197,7 @@ docker build -t scrum-poker .
 #### Running with Docker
 
 ```bash
-docker run -p 5000:5000 scrum-poker
+docker run -p 5001:5000 scrum-poker
 ```
 
 #### Using Docker Compose
