@@ -22,14 +22,20 @@ const roomClients = new Map<string, Set<string>>();
 export function setupWebSocket(server: Server) {
   const wss = new WebSocketServer({ 
     server,
-    path: '/api/ws' // Use a specific path to avoid conflicts with Vite
+    path: '/api/ws'
   });
 
-  wss.on('connection', (ws) => {
+  console.log('WebSocket server initialized on path /api/ws');
+
+  wss.on('error', (error) => {
+    console.error('WebSocket server error:', error);
+  });
+
+  wss.on('connection', (ws, req) => {
     const clientId = generateClientId();
     clients.set(clientId, { ws });
 
-    console.log(`Client ${clientId} connected`);
+    console.log(`Client ${clientId} connected from ${req.socket.remoteAddress}`);
 
     ws.on('message', async (data) => {
       try {

@@ -224,6 +224,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // WebSocket test endpoint
+  app.get("/api/ws-test", (req, res) => {
+    res.json({ 
+      message: "WebSocket server should be available at /api/ws",
+      timestamp: new Date().toISOString()
+    });
+  });
+
   const httpServer = createServer(app);
   setupWebSocket(httpServer);
   

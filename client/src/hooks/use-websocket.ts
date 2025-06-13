@@ -25,6 +25,8 @@ export function useWebSocket(roomId: string | null, participantId: string | null
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/api/ws`;
     
+    console.log('Attempting WebSocket connection to:', wsUrl);
+    
     const ws = new WebSocketClient(wsUrl);
     wsRef.current = ws;
 
