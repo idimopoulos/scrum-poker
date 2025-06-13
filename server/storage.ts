@@ -74,8 +74,8 @@ export class MemStorage implements IStorage {
     const id = `participant_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const participant: Participant = {
       id,
-      roomId: insertParticipant.roomId!,
-      name: insertParticipant.name!,
+      roomId: insertParticipant.roomId,
+      name: insertParticipant.name,
       isCreator: insertParticipant.isCreator ?? false,
       joinedAt: new Date(),
     };
@@ -105,7 +105,7 @@ export class MemStorage implements IStorage {
   async createOrUpdateVote(insertVote: InsertVote): Promise<Vote> {
     // Check if vote already exists for this participant and round
     const existingVote = Array.from(this.votes.values())
-      .find(v => v.participantId === insertVote.participantId! && v.round === insertVote.round!);
+      .find(v => v.participantId === insertVote.participantId && v.round === insertVote.round);
 
     if (existingVote) {
       // Update existing vote
@@ -122,9 +122,9 @@ export class MemStorage implements IStorage {
       const id = this.currentVoteId++;
       const vote: Vote = {
         id,
-        roomId: insertVote.roomId!,
-        participantId: insertVote.participantId!,
-        round: insertVote.round!,
+        roomId: insertVote.roomId,
+        participantId: insertVote.participantId,
+        round: insertVote.round,
         storyPoints: insertVote.storyPoints ?? null,
         timeEstimate: insertVote.timeEstimate ?? null,
         votedAt: new Date(),
@@ -149,8 +149,8 @@ export class MemStorage implements IStorage {
     const id = this.currentHistoryId++;
     const history: VotingHistory = {
       id,
-      roomId: insertHistory.roomId!,
-      round: insertHistory.round!,
+      roomId: insertHistory.roomId,
+      round: insertHistory.round,
       description: insertHistory.description ?? null,
       storyPointsConsensus: insertHistory.storyPointsConsensus ?? null,
       timeEstimateConsensus: insertHistory.timeEstimateConsensus ?? null,
