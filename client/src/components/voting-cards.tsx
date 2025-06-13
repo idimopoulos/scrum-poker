@@ -10,11 +10,11 @@ interface VotingCardsProps {
 
 export default function VotingCards({ room, currentVote, onVote, isRevealed }: VotingCardsProps) {
   const handleStoryPointSelect = (value: string) => {
-    onVote(value, currentVote?.timeEstimate);
+    onVote(value, currentVote?.timeEstimate || undefined);
   };
 
   const handleTimeEstimateSelect = (value: string) => {
-    onVote(currentVote?.storyPoints, value);
+    onVote(currentVote?.storyPoints || undefined, value);
   };
 
   return (

@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useWebSocket } from "@/hooks/use-websocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import type { Room, Vote, VotingHistory, Participant } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +18,7 @@ import ParticipantsPanel from "@/components/participants-panel";
 import StatsPanel from "@/components/stats-panel";
 import ShareModal from "@/components/share-modal";
 import JoinModal from "@/components/join-modal";
-import type { Participant } from "@shared/schema";
+
 
 export default function Room() {
   const params = useParams();
@@ -31,7 +32,12 @@ export default function Room() {
   const [nextRoundDescription, setNextRoundDescription] = useState("");
   const [clearDescriptionOnNextRound, setClearDescriptionOnNextRound] = useState(true);
 
-  const { data: roomData, isLoading, error } = useQuery({
+  const { data: roomData, isLoading, error } = useQuery<{
+    room: Room;
+    participants: Participant[];
+    votes: Vote[];
+    history: VotingHistory[];
+  }>({
     queryKey: [`/api/rooms/${roomId}`],
     enabled: !!roomId,
   });
@@ -57,9 +63,9 @@ export default function Room() {
       const storedParticipantId = sessionStorage.getItem(`participant_${roomId}`);
       const storedParticipantName = sessionStorage.getItem(`participant_name_${roomId}`);
       
-      if (storedParticipantId && storedParticipantName && roomData && 'participants' in roomData) {
+      if (storedParticipantId && storedParticipantName && roomData && roomData.participants) {
         // Find existing participant in room data
-        const existingParticipant = (roomData as any).participants.find((p: any) => p.id === storedParticipantId);
+        const existingParticipant = roomData.participants.find((p: Participant) => p.id === storedParticipantId);
         if (existingParticipant) {
           setParticipant(existingParticipant);
           return;
