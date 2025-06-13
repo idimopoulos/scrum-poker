@@ -42,7 +42,7 @@ export default function Room() {
     enabled: !!roomId,
   });
 
-  const { isConnected, roomState, sendVote, revealVotes, nextRound } = useWebSocket(
+  const { isConnected, usePolling, roomState, sendVote, revealVotes, nextRound } = useWebSocket(
     roomId || null,
     participant?.id || null
   );
@@ -238,6 +238,14 @@ export default function Room() {
               </div>
               
               <div className="flex items-center space-x-3">
+                {/* Connection Status */}
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : usePolling ? 'bg-yellow-500' : 'bg-red-500'}`} />
+                  <span className="text-slate-600 hidden sm:inline">
+                    {isConnected ? 'Real-time' : usePolling ? 'Polling' : 'Offline'}
+                  </span>
+                </div>
+                
                 <Button
                   variant="outline"
                   size="sm"

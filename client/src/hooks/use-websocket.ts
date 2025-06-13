@@ -154,6 +154,7 @@ export function useWebSocket(roomId: string | null, participantId: string | null
 
   return {
     isConnected,
+    usePolling,
     roomState,
     sendVote,
     revealVotes,
