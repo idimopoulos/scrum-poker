@@ -122,9 +122,9 @@ export class MemStorage implements IStorage {
       const id = this.currentVoteId++;
       const vote: Vote = {
         id,
-        roomId: insertVote.roomId,
-        participantId: insertVote.participantId,
-        round: insertVote.round,
+        roomId: insertVote.roomId!,
+        participantId: insertVote.participantId!,
+        round: insertVote.round!,
         storyPoints: insertVote.storyPoints ?? null,
         timeEstimate: insertVote.timeEstimate ?? null,
         votedAt: new Date(),
@@ -149,8 +149,8 @@ export class MemStorage implements IStorage {
     const id = this.currentHistoryId++;
     const history: VotingHistory = {
       id,
-      roomId: insertHistory.roomId,
-      round: insertHistory.round,
+      roomId: insertHistory.roomId!,
+      round: insertHistory.round!,
       description: insertHistory.description ?? null,
       storyPointsConsensus: insertHistory.storyPointsConsensus ?? null,
       timeEstimateConsensus: insertHistory.timeEstimateConsensus ?? null,
