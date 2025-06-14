@@ -44,18 +44,14 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
-  // Use database for session storage if available, otherwise use memory store
-  let sessionStore;
-  if (process.env.DATABASE_URL) {
-    const pgStore = connectPg(session);
-    sessionStore = new pgStore({
-      conString: process.env.DATABASE_URL,
-      createTableIfMissing: false,
-      ttl: sessionTtl,
-      tableName: "sessions",
-    });
-  }
-  // If no sessionStore is set, express-session will use memory store by default
+  // Use PostgreSQL for session storage
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: sessionTtl,
+    tableName: "sessions",
+  });
   
   return session({
     secret: process.env.SESSION_SECRET || "fallback-secret-for-production",

@@ -1,0 +1,6 @@
+# Production .env file for your server
+REPL_ID=your-repl-id-here
+REPLIT_DOMAINS=scrum.future-spark.eu
+SESSION_SECRET=your-secure-random-string-here
+NODE_ENV=production
+DATABASE_URL=postgresql://scrumpoker:scrumpoker@postgres:5432/scrumpoker
