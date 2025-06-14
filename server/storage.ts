@@ -262,14 +262,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createParticipant(insertParticipant: InsertParticipant): Promise<Participant> {
+    const values = {
+      id: insertParticipant.id,
+      roomId: insertParticipant.roomId,
+      name: insertParticipant.name,
+      isCreator: insertParticipant.isCreator || false,
+    };
+    
     const [participant] = await db
       .insert(participants)
-      .values({
-        id: insertParticipant.id,
-        roomId: insertParticipant.roomId,
-        name: insertParticipant.name,
-        isCreator: insertParticipant.isCreator || false,
-      })
+      .values(values)
       .returning();
     return participant;
   }
