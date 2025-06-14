@@ -78,6 +78,8 @@ export const votingHistory = pgTable("voting_history", {
 
 export const insertRoomSchema = createInsertSchema(rooms).omit({
   createdAt: true,
+}).extend({
+  createdBy: z.string().optional(),
 });
 
 export const insertParticipantSchema = createInsertSchema(participants).omit({
@@ -95,6 +97,8 @@ export const insertVotingHistorySchema = createInsertSchema(votingHistory).omit(
   completedAt: true,
 });
 
+export type User = typeof users.$inferSelect;
+export type UpsertUser = typeof users.$inferInsert;
 export type Room = typeof rooms.$inferSelect;
 export type InsertRoom = z.infer<typeof insertRoomSchema>;
 export type Participant = typeof participants.$inferSelect;

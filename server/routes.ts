@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertRoomSchema, insertParticipantSchema, insertVoteSchema } from "@shared/schema";
 import { setupWebSocket } from "./websocket";
 

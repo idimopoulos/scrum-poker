@@ -1,12 +1,17 @@
 import { 
-  rooms, participants, votes, votingHistory,
+  rooms, participants, votes, votingHistory, users,
   type Room, type InsertRoom,
   type Participant, type InsertParticipant,
   type Vote, type InsertVote,
-  type VotingHistory, type InsertVotingHistory
+  type VotingHistory, type InsertVotingHistory,
+  type User, type UpsertUser
 } from "@shared/schema";
 
 export interface IStorage {
+  // User operations
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  
   // Room operations
   createRoom(room: InsertRoom): Promise<Room>;
   getRoom(id: string): Promise<Room | undefined>;
@@ -29,12 +34,33 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<string, User> = new Map();
   private rooms: Map<string, Room> = new Map();
   private participants: Map<string, Participant> = new Map();
   private votes: Map<number, Vote> = new Map();
   private votingHistory: Map<number, VotingHistory> = new Map();
   private currentVoteId = 1;
   private currentHistoryId = 1;
+
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existingUser = this.users.get(userData.id);
+    const user: User = {
+      id: userData.id,
+      email: userData.email || null,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      createdAt: existingUser?.createdAt || new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
 
   // Room operations
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
@@ -50,6 +76,7 @@ export class MemStorage implements IStorage {
       currentRound: insertRoom.currentRound || 1,
       currentDescription: insertRoom.currentDescription || null,
       isRevealed: insertRoom.isRevealed ?? false,
+      createdBy: insertRoom.createdBy || null,
       createdAt: new Date(),
     };
     this.rooms.set(room.id, room);
