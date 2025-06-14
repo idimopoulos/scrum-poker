@@ -12,7 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Club } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Club, Users, Clock, BarChart3, LogIn } from "lucide-react";
+import AuthHeader from "@/components/auth-header";
 
 interface RoomSettings {
   name: string;
@@ -25,7 +27,10 @@ interface RoomSettings {
   autoReveal: boolean;
 }
 
+
+
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [joinRoomId, setJoinRoomId] = useState("");
@@ -91,19 +96,39 @@ export default function Home() {
     setLocation(`/room/${joinRoomId.toUpperCase()}`);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
-              <Club className="h-6 w-6 text-white" />
+    <div className="min-h-screen bg-slate-50">
+      <header className="bg-white shadow-sm border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                <Club className="h-6 w-6 text-white" />
+              </div>
+              <h1 className="text-xl font-semibold text-slate-800">Scrum Poker</h1>
             </div>
-            <h1 className="text-3xl font-bold text-slate-800">Scrum Poker</h1>
+            <AuthHeader />
           </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Create Your Planning Session</h1>
           <p className="text-slate-600 text-lg">
-            Plan and estimate your team's work with collaborative voting
+            Set up a new room with custom settings for your team's estimation needs
           </p>
         </div>
 
@@ -332,7 +357,7 @@ export default function Home() {
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

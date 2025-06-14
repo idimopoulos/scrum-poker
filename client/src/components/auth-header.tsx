@@ -6,7 +6,6 @@ import type { User as UserType } from "@shared/schema";
 
 export default function AuthHeader() {
   const { user, isLoading, isAuthenticated } = useAuth();
-  const typedUser = user as UserType | undefined;
 
   if (isLoading) {
     return (
@@ -30,18 +29,20 @@ export default function AuthHeader() {
     );
   }
 
+  const userData = user as any;
+
   return (
     <div className="flex items-center space-x-3">
       <div className="flex items-center space-x-2">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={user?.profileImageUrl || undefined} />
+          <AvatarImage src={userData?.profileImageUrl || undefined} />
           <AvatarFallback>
-            {user?.firstName ? user.firstName[0] : user?.email?.[0] || <User className="h-4 w-4" />}
+            {userData?.firstName ? userData.firstName[0] : userData?.email?.[0] || <User className="h-4 w-4" />}
           </AvatarFallback>
         </Avatar>
         <div className="hidden sm:block">
           <div className="text-sm font-medium text-slate-800">
-            {user?.firstName || user?.email?.split('@')[0] || 'User'}
+            {userData?.firstName || userData?.email?.split('@')[0] || 'User'}
           </div>
         </div>
       </div>

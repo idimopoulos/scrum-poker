@@ -255,10 +255,8 @@ export default function Room() {
                   <Share className="h-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Share Room</span>
                 </Button>
-                <Button variant="outline" size="sm">
-                  <Settings className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Settings</span>
-                </Button>
+                
+                <AuthHeader />
               </div>
             </div>
           </div>
