@@ -8,12 +8,22 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Check if we're in a Replit environment
-const isReplitEnvironment = process.env.REPLIT_DOMAINS && process.env.REPL_ID;
+// Check if we're in a Replit environment - only use OAuth if we're actually running on Replit
+const isActuallyOnReplit = process.env.REPLIT_DOMAINS && process.env.REPLIT_DOMAINS.includes('.replit.dev');
+const isReplitEnvironment = isActuallyOnReplit && process.env.REPL_ID;
+
+console.log("[AUTH DEBUG] Environment check:");
+console.log("- REPLIT_DOMAINS:", process.env.REPLIT_DOMAINS);
+console.log("- REPL_ID:", process.env.REPL_ID ? "SET" : "NOT SET");
+console.log("- NODE_ENV:", process.env.NODE_ENV);
+console.log("- isActuallyOnReplit:", isActuallyOnReplit);
+console.log("- isReplitEnvironment:", isReplitEnvironment);
 
 // For production deployment outside Replit, disable OAuth and use simple session-based auth
 if (!isReplitEnvironment) {
-  console.log("Running in production mode without Replit OAuth - using simple authentication");
+  console.log("[AUTH DEBUG] Running in production mode without Replit OAuth - using simple authentication");
+} else {
+  console.log("[AUTH DEBUG] Running with Replit OAuth enabled");
 }
 
 const getOidcConfig = memoize(
@@ -80,12 +90,14 @@ async function upsertUser(
 }
 
 export async function setupAuth(app: Express) {
+  console.log("[AUTH DEBUG] Setting up authentication...");
   app.set("trust proxy", 1);
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
 
   if (isReplitEnvironment) {
+    console.log("[AUTH DEBUG] Setting up Replit OAuth...");
     // Setup Replit OAuth for development
     const config = await getOidcConfig();
 
@@ -116,7 +128,9 @@ export async function setupAuth(app: Express) {
     passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
     app.get("/api/login", (req, res, next) => {
-      passport.authenticate(`replitauth:${req.hostname}`, {
+      const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
+      console.log("[AUTH DEBUG] Login attempt for domain:", domain);
+      passport.authenticate(`replitauth:${domain}`, {
         prompt: "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
       })(req, res, next);
@@ -140,8 +154,10 @@ export async function setupAuth(app: Express) {
       });
     });
   } else {
+    console.log("[AUTH DEBUG] Setting up simple production authentication...");
     // Production mode - simplified authentication
     app.get("/api/login", (req, res) => {
+      console.log("[AUTH DEBUG] Login request received");
       // Create a demo user for production
       const user = {
         claims: {
@@ -154,11 +170,14 @@ export async function setupAuth(app: Express) {
         }
       };
       
+      console.log("[AUTH DEBUG] Creating user session:", user.claims.sub);
       req.login(user, async (err) => {
         if (err) {
+          console.log("[AUTH DEBUG] Login error:", err);
           return res.status(500).json({ error: "Login failed" });
         }
         
+        console.log("[AUTH DEBUG] Session created, upserting user");
         // Create user in database
         await upsertUser({
           id: user.claims.sub,
@@ -168,11 +187,13 @@ export async function setupAuth(app: Express) {
           profileImageUrl: user.claims.profile_image_url,
         });
         
+        console.log("[AUTH DEBUG] Redirecting to home");
         res.redirect("/");
       });
     });
 
     app.get("/api/logout", (req, res) => {
+      console.log("[AUTH DEBUG] Logout request received");
       req.logout(() => {
         res.redirect("/");
       });
@@ -184,29 +205,51 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  console.log("[AUTH DEBUG] isAuthenticated check:");
+  console.log("- req.isAuthenticated():", req.isAuthenticated());
+  console.log("- req.user:", req.user ? "EXISTS" : "NULL");
+  
   const user = req.user as any;
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user) {
+    console.log("[AUTH DEBUG] Not authenticated - returning 401");
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  // For simple auth mode, just check if user exists
+  if (!isReplitEnvironment) {
+    console.log("[AUTH DEBUG] Simple auth mode - user authenticated");
+    return next();
+  }
+
+  // For OAuth mode, check token expiration
+  if (!user.expires_at) {
+    console.log("[AUTH DEBUG] No expires_at - returning 401");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const now = Math.floor(Date.now() / 1000);
   if (now <= user.expires_at) {
+    console.log("[AUTH DEBUG] Token valid - proceeding");
     return next();
   }
 
   const refreshToken = user.refresh_token;
   if (!refreshToken) {
+    console.log("[AUTH DEBUG] No refresh token - returning 401");
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
 
   try {
+    console.log("[AUTH DEBUG] Attempting token refresh");
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
+    console.log("[AUTH DEBUG] Token refreshed successfully");
     return next();
   } catch (error) {
+    console.log("[AUTH DEBUG] Token refresh failed:", error);
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
