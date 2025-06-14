@@ -231,54 +231,6 @@ export async function setupAuth(app: Express) {
         );
       });
     });
-  } else {
-    console.log("[AUTH DEBUG] Setting up simple production authentication...");
-    // Production mode - simplified authentication
-    app.get("/api/login", (req, res) => {
-      console.log("[AUTH DEBUG] Login request received");
-      // Create a demo user for production
-      const user = {
-        claims: {
-          sub: "demo-user-" + Date.now(),
-          email: "demo@example.com",
-          first_name: "Demo",
-          last_name: "User",
-          profile_image_url: null,
-          exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
-        }
-      };
-      
-      console.log("[AUTH DEBUG] Creating user session:", user.claims.sub);
-      req.login(user, async (err) => {
-        if (err) {
-          console.log("[AUTH DEBUG] Login error:", err);
-          return res.status(500).json({ error: "Login failed" });
-        }
-        
-        console.log("[AUTH DEBUG] Session created, upserting user");
-        // Create user in database
-        await upsertUser({
-          id: user.claims.sub,
-          email: user.claims.email,
-          firstName: user.claims.first_name,
-          lastName: user.claims.last_name,
-          profileImageUrl: user.claims.profile_image_url,
-        });
-        
-        console.log("[AUTH DEBUG] Redirecting to home");
-        res.redirect("/");
-      });
-    });
-
-    app.get("/api/logout", (req, res) => {
-      console.log("[AUTH DEBUG] Logout request received");
-      req.logout(() => {
-        res.redirect("/");
-      });
-    });
-
-    passport.serializeUser((user: Express.User, cb) => cb(null, user));
-    passport.deserializeUser((user: Express.User, cb) => cb(null, user));
   }
 }
 
