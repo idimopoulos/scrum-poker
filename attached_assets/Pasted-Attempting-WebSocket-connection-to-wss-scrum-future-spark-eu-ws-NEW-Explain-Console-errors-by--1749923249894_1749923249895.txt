@@ -1,0 +1,88 @@
+Attempting WebSocket connection to: wss://scrum.future-spark.eu/ws
+[NEW] Explain Console errors by using Copilot in Edge: click 
+ to explain an error. Learn more
+Don't show again
+index-2sqAs6P4.js:198 
+ WebSocket connection to 'wss://scrum.future-spark.eu/ws' failed: 
+index-2sqAs6P4.js:198 
+ WebSocket error: 
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+index-2sqAs6P4.js:198 
+ WebSocket URL: wss://scrum.future-spark.eu/ws
+index-2sqAs6P4.js:198 
+ WebSocket readyState: 3
+index-2sqAs6P4.js:198 
+ Connection attempt failed - may be reverse proxy or SSL issue
+index-2sqAs6P4.js:198 
+ WebSocket connection failed, falling back to polling: 
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+index-2sqAs6P4.js:198 WebSocket disconnected
+index-2sqAs6P4.js:198 Attempting to reconnect... (1/5)
+index-2sqAs6P4.js:198 
+ WebSocket connection to 'wss://scrum.future-spark.eu/ws' failed: 
+index-2sqAs6P4.js:198 
+ WebSocket error: 
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+index-2sqAs6P4.js:198 
+ WebSocket URL: wss://scrum.future-spark.eu/ws
+index-2sqAs6P4.js:198 
+ WebSocket readyState: 3
+index-2sqAs6P4.js:198 
+ Connection attempt failed - may be reverse proxy or SSL issue
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+index-2sqAs6P4.js:198 WebSocket disconnected
+index-2sqAs6P4.js:198 Attempting to reconnect... (2/5)
+index-2sqAs6P4.js:198 
+ WebSocket connection to 'wss://scrum.future-spark.eu/ws' failed: 
+index-2sqAs6P4.js:198 
+ WebSocket error: 
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+index-2sqAs6P4.js:198 
+ WebSocket URL: wss://scrum.future-spark.eu/ws
+index-2sqAs6P4.js:198 
+ WebSocket readyState: 3
+index-2sqAs6P4.js:198 
+ Connection attempt failed - may be reverse proxy or SSL issue
+Event {isTrusted: true, type: 'error', target: WebSocket, currentTarget: WebSocket, eventPhase: 2, …}
+isTrusted
+: 
+true
+bubbles
+: 
+false
+cancelBubble
+: 
+false
+cancelable
+: 
+false
+composed
+: 
+false
+currentTarget
+: 
+WebSocket {url: 'wss://scrum.future-spark.eu/ws', readyState: 3, bufferedAmount: 0, onopen: ƒ, onerror: ƒ, …}
+defaultPrevented
+: 
+false
+eventPhase
+: 
+0
+returnValue
+: 
+true
+srcElement
+: 
+WebSocket {url: 'wss://scrum.future-spark.eu/ws', readyState: 3, bufferedAmount: 0, onopen: ƒ, onerror: ƒ, …}
+target
+: 
+WebSocket {url: 'wss://scrum.future-spark.eu/ws', readyState: 3, bufferedAmount: 0, onopen: ƒ, onerror: ƒ, …}
+timeStamp
+: 
+5831.5
+type
+: 
+"error"
+[[Prototype]]
+: 
+Event

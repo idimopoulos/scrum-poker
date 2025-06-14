@@ -1,49 +1,17 @@
+version: '3.8'
+
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     ports:
       - "5001:5000"
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - DATABASE_URL=postgresql://scrumpoker:scrumpoker@postgres:5432/scrumpoker
-      - REPL_ID=${REPL_ID}
-      - REPLIT_DOMAINS=${REPLIT_DOMAINS}
-      - SESSION_SECRET=${SESSION_SECRET}
-    env_file:
-      - .env
-    volumes:
-      - /app/node_modules
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/auth/user"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: scrumpoker
-      POSTGRES_USER: scrumpoker
-      POSTGRES_PASSWORD: scrumpoker
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init.sql
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U scrumpoker -d scrumpoker"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  postgres_data:

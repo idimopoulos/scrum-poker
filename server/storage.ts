@@ -360,4 +360,4 @@ export class DatabaseStorage implements IStorage {
 }
 
 // Use DatabaseStorage with PostgreSQL
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();
