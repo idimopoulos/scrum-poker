@@ -8,9 +8,13 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
+      - DATABASE_URL=postgresql://scrumpoker:scrumpoker@postgres:5432/scrumpoker
     volumes:
       - /app/node_modules
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000"]
       interval: 30s
@@ -18,18 +22,22 @@ services:
       retries: 3
       start_period: 40s
 
-  # Optional: Add PostgreSQL if you want to switch from in-memory storage
-  # postgres:
-  #   image: postgres:15-alpine
-  #   environment:
-  #     POSTGRES_DB: scrumpoker
-  #     POSTGRES_USER: scrumpoker
-  #     POSTGRES_PASSWORD: scrumpoker
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: scrumpoker
+      POSTGRES_USER: scrumpoker
+      POSTGRES_PASSWORD: scrumpoker
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scrumpoker -d scrumpoker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-# volumes:
-#   postgres_data:
+volumes:
+  postgres_data:
