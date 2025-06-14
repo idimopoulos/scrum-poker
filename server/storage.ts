@@ -210,7 +210,7 @@ export class MemStorage implements IStorage {
 
 
 
-// Database storage implementation
+// Database storage implementation removed for simplified deployment
 /*
 export class DatabaseStorage implements IStorage {
   // User operations
