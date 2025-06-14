@@ -79,8 +79,8 @@ export class MemStorage implements IStorage {
       timeUnits: insertRoom.timeUnits || "hours",
       dualVoting: insertRoom.dualVoting ?? true,
       autoReveal: insertRoom.autoReveal ?? false,
-      storyPointValues: [...(insertRoom.storyPointValues || [])],
-      timeValues: [...(insertRoom.timeValues || [])],
+      storyPointValues: insertRoom.storyPointValues ? Array.from(insertRoom.storyPointValues as string[]) : [],
+      timeValues: insertRoom.timeValues ? Array.from(insertRoom.timeValues as string[]) : [],
       currentRound: insertRoom.currentRound || 1,
       currentDescription: insertRoom.currentDescription || null,
       isRevealed: insertRoom.isRevealed ?? false,
@@ -211,6 +211,7 @@ export class MemStorage implements IStorage {
 
 
 // Database storage implementation
+/* Commented out until needed
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
@@ -240,9 +241,14 @@ export class DatabaseStorage implements IStorage {
 
   // Room operations - now using database
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
+    const roomData = {
+      ...insertRoom,
+      storyPointValues: Array.from(insertRoom.storyPointValues as string[]) || [],
+      timeValues: Array.from(insertRoom.timeValues as string[]) || []
+    };
     const [room] = await db
       .insert(rooms)
-      .values(insertRoom)
+      .values(roomData)
       .returning();
     return room;
   }
@@ -358,6 +364,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(votingHistory.round);
   }
 }
+*/
 
-// Use DatabaseStorage with PostgreSQL
+// Use MemStorage for simplified deployment
 export const storage = new MemStorage();
