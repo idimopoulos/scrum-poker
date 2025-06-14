@@ -159,6 +159,30 @@ async function handleVote(clientId: string, message: VoteMessage) {
 
     if (allVoted && !room.isRevealed) {
       await storage.updateRoom(roomId, { isRevealed: true });
+      
+      // Save voting history when auto-revealing
+      const existingHistory = await storage.getVotingHistoryByRoom(roomId);
+      const roundExists = existingHistory.some(h => h.round === room.currentRound);
+      
+      if (!roundExists) {
+        const storyPointVotes = votes.filter((v: any) => v.storyPoints).map((v: any) => v.storyPoints!);
+        const timeVotes = votes.filter((v: any) => v.timeEstimate).map((v: any) => v.timeEstimate!);
+
+        const historyEntry = await storage.createVotingHistory({
+          roomId,
+          round: room.currentRound,
+          description: room.currentDescription || `Round ${room.currentRound}`,
+          storyPointsConsensus: storyPointVotes.length > 0 ? getMostCommon(storyPointVotes) : null,
+          timeEstimateConsensus: timeVotes.length > 0 ? getMostCommon(timeVotes) : null,
+          storyPointsAvg: storyPointVotes.length > 0 ? calculateAverage(storyPointVotes) : null,
+          storyPointsMin: storyPointVotes.length > 0 ? Math.min(...storyPointVotes.map(parseVoteValue)).toString() : null,
+          storyPointsMax: storyPointVotes.length > 0 ? Math.max(...storyPointVotes.map(parseVoteValue)).toString() : null,
+          timeEstimateAvg: timeVotes.length > 0 ? calculateAverage(timeVotes) : null,
+          timeEstimateMin: timeVotes.length > 0 ? Math.min(...timeVotes.map(parseVoteValue)).toString() : null,
+          timeEstimateMax: timeVotes.length > 0 ? Math.max(...timeVotes.map(parseVoteValue)).toString() : null,
+        });
+        console.log(`Voting history saved for room ${roomId}, round ${room.currentRound}:`, historyEntry);
+      }
     }
   }
 
@@ -170,7 +194,40 @@ async function handleRevealVotes(clientId: string, message: RevealVotesMessage) 
   const client = clients.get(clientId);
   if (!client || client.roomId !== roomId) return;
 
+  const room = await storage.getRoom(roomId);
+  if (!room) return;
+
+  // Update room to revealed state
   await storage.updateRoom(roomId, { isRevealed: true });
+
+  // Save voting history immediately when votes are revealed
+  const votes = await storage.getVotesByRoomAndRound(roomId, room.currentRound);
+  if (votes.length > 0) {
+    // Check if history for this round already exists
+    const existingHistory = await storage.getVotingHistoryByRoom(roomId);
+    const roundExists = existingHistory.some(h => h.round === room.currentRound);
+    
+    if (!roundExists) {
+      const storyPointVotes = votes.filter((v: any) => v.storyPoints).map((v: any) => v.storyPoints!);
+      const timeVotes = votes.filter((v: any) => v.timeEstimate).map((v: any) => v.timeEstimate!);
+
+      const historyEntry = await storage.createVotingHistory({
+        roomId,
+        round: room.currentRound,
+        description: room.currentDescription || `Round ${room.currentRound}`,
+        storyPointsConsensus: storyPointVotes.length > 0 ? getMostCommon(storyPointVotes) : null,
+        timeEstimateConsensus: timeVotes.length > 0 ? getMostCommon(timeVotes) : null,
+        storyPointsAvg: storyPointVotes.length > 0 ? calculateAverage(storyPointVotes) : null,
+        storyPointsMin: storyPointVotes.length > 0 ? Math.min(...storyPointVotes.map(parseVoteValue)).toString() : null,
+        storyPointsMax: storyPointVotes.length > 0 ? Math.max(...storyPointVotes.map(parseVoteValue)).toString() : null,
+        timeEstimateAvg: timeVotes.length > 0 ? calculateAverage(timeVotes) : null,
+        timeEstimateMin: timeVotes.length > 0 ? Math.min(...timeVotes.map(parseVoteValue)).toString() : null,
+        timeEstimateMax: timeVotes.length > 0 ? Math.max(...timeVotes.map(parseVoteValue)).toString() : null,
+      });
+      console.log(`Manual reveal - Voting history saved for room ${roomId}, round ${room.currentRound}:`, historyEntry);
+    }
+  }
+
   await broadcastRoomUpdate(roomId);
 }
 
