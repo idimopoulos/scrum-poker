@@ -2,7 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { setupSimpleAuth, isAuthenticated as simpleIsAuthenticated } from "./simpleAuth";
 import { insertRoomSchema, insertParticipantSchema, insertVoteSchema } from "@shared/schema";
 import { setupWebSocket } from "./websocket";
 
@@ -27,13 +26,11 @@ const DEFAULT_TIME_UNITS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware - use simple auth for all environments to avoid dependency issues
-  await setupSimpleAuth(app);
-
-  const authMiddleware = simpleIsAuthenticated;
+  // Setup Replit OAuth authentication
+  await setupAuth(app);
 
   // Auth routes
-  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
