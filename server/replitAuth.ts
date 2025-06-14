@@ -8,10 +8,11 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Check if we're in a Replit environment - only use OAuth if we're actually running on Replit
+// Check if we're in a Replit environment vs production deployment
 const isActuallyOnReplit = process.env.REPLIT_DOMAINS && process.env.REPLIT_DOMAINS.includes('.replit.dev');
-const isProductionDeployment = process.env.NODE_ENV === 'production' && !isActuallyOnReplit;
+const isProductionDeployment = process.env.NODE_ENV === 'production';
 const isReplitEnvironment = isActuallyOnReplit && process.env.REPL_ID;
+const isCustomDomain = process.env.REPLIT_DOMAINS && !process.env.REPLIT_DOMAINS.includes('.replit.dev');
 
 console.log("[AUTH DEBUG] Environment check:");
 console.log("- REPLIT_DOMAINS:", process.env.REPLIT_DOMAINS);
@@ -95,7 +96,7 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  if (isReplitEnvironment) {
+  if (isReplitEnvironment && !isCustomDomain) {
     console.log("[AUTH DEBUG] Setting up Replit OAuth...");
     // Setup Replit OAuth for development
     const config = await getOidcConfig();
@@ -127,9 +128,17 @@ export async function setupAuth(app: Express) {
     passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
     app.get("/api/login", (req, res, next) => {
-      const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
-      console.log("[AUTH DEBUG] Login attempt for domain:", domain);
-      passport.authenticate(`replitauth:${domain}`, {
+      console.log("[AUTH DEBUG] Login attempt for domain:", req.hostname);
+      // Check if this is a registered Replit domain
+      const replitDomains = process.env.REPLIT_DOMAINS!.split(",");
+      const isReplitDomain = replitDomains.includes(req.hostname);
+      
+      if (!isReplitDomain) {
+        console.log("[AUTH DEBUG] Non-Replit domain detected, redirecting to simple auth");
+        return res.redirect("/api/simple-login");
+      }
+      
+      passport.authenticate(`replitauth:${req.hostname}`, {
         prompt: "login consent",
         scope: ["openid", "email", "profile", "offline_access"],
       })(req, res, next);
@@ -140,6 +149,36 @@ export async function setupAuth(app: Express) {
         successReturnToOrRedirect: "/",
         failureRedirect: "/api/login",
       })(req, res, next);
+    });
+
+    app.get("/api/simple-login", (req, res) => {
+      console.log("[AUTH DEBUG] Simple login for production domain");
+      // Create a simple user session for production
+      const userId = `demo-user-${Date.now()}`;
+      console.log("[AUTH DEBUG] Creating user session:", userId);
+      
+      (req as any).login({ claims: { sub: userId } }, async (err: any) => {
+        if (err) {
+          console.error("[AUTH DEBUG] Login error:", err);
+          return res.status(500).json({ message: "Login failed" });
+        }
+        
+        console.log("[AUTH DEBUG] Session created, upserting user");
+        try {
+          await storage.upsertUser({
+            id: userId,
+            email: null,
+            firstName: "Demo",
+            lastName: "User",
+            profileImageUrl: null,
+          });
+          console.log("[AUTH DEBUG] User upserted successfully, redirecting to /");
+          res.redirect("/");
+        } catch (error) {
+          console.error("[AUTH DEBUG] User upsert failed:", error);
+          res.status(500).json({ message: "User creation failed" });
+        }
+      });
     });
 
     app.get("/api/logout", (req, res) => {
