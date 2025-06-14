@@ -117,14 +117,6 @@ export default function Home() {
                 </div>
                 <h1 className="text-xl font-semibold text-slate-800">Scrum Poker</h1>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.location.href = '/api/login'}
-                className="flex items-center space-x-2"
-              >
-                <span>Sign In</span>
-              </Button>
             </div>
           </div>
         </header>
@@ -139,14 +131,12 @@ export default function Home() {
               Real-time Scrum poker for agile teams. Streamline your planning sessions with 
               collaborative estimation, dual voting systems, and comprehensive analytics.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                onClick={() => window.location.href = '/api/login'}
-                className="flex items-center space-x-2"
-              >
-                <span>Sign In to Create Room</span>
-              </Button>
+            
+            <div className="max-w-md mx-auto mb-12">
+              <LoginForm onSuccess={() => window.location.reload()} />
+            </div>
+
+            <div className="text-center">
               <Button 
                 variant="outline" 
                 size="lg"
@@ -155,7 +145,7 @@ export default function Home() {
                   if (roomId) window.location.href = `/room/${roomId}`;
                 }}
               >
-                Join Existing Room
+                Join Existing Room as Guest
               </Button>
             </div>
           </div>

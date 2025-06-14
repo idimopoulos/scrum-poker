@@ -31,10 +31,10 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Welcome!",
-        description: "You've been logged in successfully.",
+        description: `Signed in as ${data.user.email}`,
       });
       onSuccess();
     },
