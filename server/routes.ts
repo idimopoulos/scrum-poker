@@ -27,16 +27,10 @@ const DEFAULT_TIME_UNITS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware - use Replit auth in development, simple auth in production
-  const isReplitEnvironment = process.env.REPLIT_DOMAINS && process.env.REPL_ID;
-  
-  if (isReplitEnvironment) {
-    await setupAuth(app);
-  } else {
-    await setupSimpleAuth(app);
-  }
+  // Auth middleware - use simple auth for all environments to avoid dependency issues
+  await setupSimpleAuth(app);
 
-  const authMiddleware = isReplitEnvironment ? isAuthenticated : simpleIsAuthenticated;
+  const authMiddleware = simpleIsAuthenticated;
 
   // Auth routes
   app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
