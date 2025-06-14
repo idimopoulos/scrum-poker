@@ -78,7 +78,7 @@ export default function Room() {
       
       if (isCreator) {
         // If creator, create participant automatically
-        handleJoinRoom("Room Creator");
+        handleJoinRoom("Room Creator", true);
       } else {
         // Show join modal for others
         setShowJoinModal(true);
@@ -92,9 +92,9 @@ export default function Room() {
     }
   }, [roomState.room]);
 
-  const handleJoinRoom = async (name: string) => {
+  const handleJoinRoom = async (name: string, isCreator: boolean = false) => {
     try {
-      const response = await apiRequest("POST", `/api/rooms/${roomId}/join`, { name });
+      const response = await apiRequest("POST", `/api/rooms/${roomId}/join`, { name, isCreator });
       const data = await response.json();
       const newParticipant = data.participant || data; // Handle both response formats
       setParticipant(newParticipant);
@@ -191,7 +191,7 @@ export default function Room() {
         <JoinModal
           isOpen={showJoinModal}
           onClose={() => setShowJoinModal(false)}
-          onJoin={handleJoinRoom}
+          onJoin={(name) => handleJoinRoom(name, false)}
           roomId={roomId || ""}
         />
       </>
