@@ -1,13 +1,10 @@
 import { 
-  rooms, participants, votes, votingHistory, users,
   type Room, type InsertRoom,
   type Participant, type InsertParticipant,
   type Vote, type InsertVote,
   type VotingHistory, type InsertVotingHistory,
   type User, type UpsertUser
 } from "@shared/schema";
-import { db } from "./db";
-import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
