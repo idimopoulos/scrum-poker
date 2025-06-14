@@ -81,97 +81,38 @@ export default function StatsPanel({
         </CardContent>
       </Card>
 
-      {/* Voting History */}
+      {/* Room Information */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-semibold text-slate-800 uppercase tracking-wide">
-              History
-            </CardTitle>
-            <button className="text-xs text-slate-500 hover:text-slate-700 transition-colors">
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
+          <CardTitle className="text-sm font-semibold text-slate-800 uppercase tracking-wide">
+            Room Settings
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {history.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-4">
-              No completed rounds yet
-            </p>
-          ) : (
-            history.slice(0, 5).map((round) => (
-              <div key={round.id} className="p-3 bg-slate-50 rounded-lg">
-                <div className="text-xs text-slate-600 mb-1">
-                  Round {round.round} - {round.description || "No description"}
-                </div>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center space-x-2">
-                    {round.storyPointsConsensus && (
-                      <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded font-medium">
-                        {round.storyPointsConsensus} pts
-                      </span>
-                    )}
-                    {round.timeEstimateConsensus && (
-                      <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-medium">
-                        {round.timeEstimateConsensus}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {/* Story Points Statistics */}
-                <div className="mb-2">
-                  <div className="text-xs text-slate-600 mb-1 font-medium">Story Points</div>
-                  <div className="grid grid-cols-3 gap-2 text-xs">
-                    <div className="text-center">
-                      <div className="text-slate-500">Avg</div>
-                      <div className="font-medium text-slate-700">
-                        {round.storyPointsAvg || "—"}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-slate-500">Min</div>
-                      <div className="font-medium text-slate-700">
-                        {round.storyPointsMin || "—"}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-slate-500">Max</div>
-                      <div className="font-medium text-slate-700">
-                        {round.storyPointsMax || "—"}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Time Estimates Statistics - Only show if dual voting and data exists */}
-                {room.dualVoting && (round.timeEstimateAvg || round.timeEstimateMin || round.timeEstimateMax) && (
-                  <div>
-                    <div className="text-xs text-slate-600 mb-1 font-medium">Time ({room.timeUnits})</div>
-                    <div className="grid grid-cols-3 gap-2 text-xs">
-                      <div className="text-center">
-                        <div className="text-slate-500">Avg</div>
-                        <div className="font-medium text-slate-700">
-                          {round.timeEstimateAvg || "—"}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-slate-500">Min</div>
-                        <div className="font-medium text-slate-700">
-                          {round.timeEstimateMin || "—"}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-slate-500">Max</div>
-                        <div className="font-medium text-slate-700">
-                          {round.timeEstimateMax || "—"}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))
-          )}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-600">Voting Type</span>
+            <span className="text-sm font-medium text-slate-800">
+              {room.dualVoting ? "Dual Voting" : "Story Points Only"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-600">Auto Reveal</span>
+            <span className="text-sm font-medium text-slate-800">
+              {room.autoReveal ? "Enabled" : "Disabled"}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-600">Participants</span>
+            <span className="text-sm font-medium text-slate-800">
+              {participants.length}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-600">System</span>
+            <span className="text-sm font-medium text-slate-800">
+              {room.votingSystem}
+            </span>
+          </div>
         </CardContent>
       </Card>
 

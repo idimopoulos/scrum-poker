@@ -5,7 +5,7 @@ import { useWebSocket } from "@/hooks/use-websocket";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import type { Room, Vote, VotingHistory, Participant } from "@shared/schema";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
@@ -379,12 +379,114 @@ export default function Room() {
               <StatsPanel
                 room={room}
                 votes={votes}
-                history={history}
+                history={[]}
                 participants={participants}
                 votingProgress={votingProgress}
                 currentParticipant={participant}
               />
             </div>
+          </div>
+
+          {/* Voting History Section - Moved to Bottom */}
+          <div className="mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg font-semibold text-slate-800">
+                  Voting History
+                </CardTitle>
+                <p className="text-sm text-slate-600">
+                  Latest {Math.min(history.length, 20)} rounds
+                </p>
+              </CardHeader>
+              <CardContent>
+                {history.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                      <span className="text-2xl">📊</span>
+                    </div>
+                    <p>No voting history yet</p>
+                    <p className="text-sm">Complete a round to see statistics here</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {history
+                      .sort((a, b) => b.round - a.round)
+                      .slice(0, 20)
+                      .map((round) => (
+                        <div key={round.id} className="border border-slate-200 rounded-lg p-4">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <h4 className="font-medium text-slate-800">Round {round.round}</h4>
+                              {round.description && (
+                                <p className="text-sm text-slate-600 mt-1">{round.description}</p>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {new Date(round.completedAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            {true && (
+                              <div>
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="text-slate-600">Story Points</span>
+                                </div>
+                                <div className="space-y-1">
+                                  {round.storyPointsConsensus && (
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Consensus:</span>
+                                      <span className="font-medium text-emerald-600">
+                                        {round.storyPointsConsensus}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {round.storyPointsAvg && (
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Average:</span>
+                                      <span className="text-slate-700">{round.storyPointsAvg}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {room.dualVoting && (
+                              <div>
+                                <div className="flex justify-between items-center mb-1">
+                                  <span className="text-slate-600">Time Estimate</span>
+                                </div>
+                                <div className="space-y-1">
+                                  {round.timeEstimateConsensus && (
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Consensus:</span>
+                                      <span className="font-medium text-blue-600">
+                                        {round.timeEstimateConsensus}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {round.timeEstimateAvg && (
+                                    <div className="flex justify-between">
+                                      <span className="text-slate-500">Average:</span>
+                                      <span className="text-slate-700">{round.timeEstimateAvg}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      
+                    {history.length > 20 && (
+                      <div className="text-center py-4 text-slate-500 text-sm">
+                        Showing latest 20 of {history.length} rounds
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </main>
       </div>
