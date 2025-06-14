@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/dialog";
 import { User, Lock } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface GuestLoginModalProps {

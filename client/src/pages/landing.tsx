@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Clock, BarChart3, LogIn, User } from "lucide-react";
 import AuthHeader from "@/components/auth-header";
-import GuestLoginModal from "@/components/guest-login-modal";
 
 export default function LandingPage() {
   return (
@@ -40,16 +39,34 @@ export default function LandingPage() {
               <LogIn className="h-5 w-5" />
               <span>Sign In to Create Room</span>
             </Button>
-            <GuestLoginModal>
-              <Button 
-                variant="outline" 
-                size="lg"
-                className="flex items-center space-x-2"
-              >
-                <User className="h-5 w-5" />
-                <span>Play as Guest</span>
-              </Button>
-            </GuestLoginModal>
+            <Button 
+              variant="outline" 
+              size="lg"
+              className="flex items-center space-x-2"
+              onClick={() => {
+                const password = prompt("Enter access password to create rooms:");
+                if (password) {
+                  fetch("/api/guest-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password })
+                  })
+                  .then(res => res.json())
+                  .then(data => {
+                    if (data.success) {
+                      alert("Guest authentication successful!");
+                      window.location.href = "/";
+                    } else {
+                      alert("Invalid password. Please try again.");
+                    }
+                  })
+                  .catch(() => alert("Authentication failed. Please try again."));
+                }
+              }}
+            >
+              <User className="h-5 w-5" />
+              <span>Play as Guest</span>
+            </Button>
             <Button 
               variant="outline" 
               size="lg"
