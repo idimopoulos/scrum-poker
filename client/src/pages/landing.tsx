@@ -42,10 +42,10 @@ export default function LandingPage() {
             <Button 
               variant="outline" 
               size="lg"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 bg-green-50 border-green-200 text-green-800 hover:bg-green-100"
               onClick={() => {
-                const password = prompt("Enter access password to create rooms:");
-                if (password) {
+                const password = prompt("Enter access password to create rooms as guest:");
+                if (password === "FOoM30Ws68PSpickSxrnGmStuD1OsaM") {
                   fetch("/api/guest-login", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -54,18 +54,20 @@ export default function LandingPage() {
                   .then(res => res.json())
                   .then(data => {
                     if (data.success) {
-                      alert("Guest authentication successful!");
-                      window.location.href = "/";
+                      alert("Guest access granted! You can now create rooms.");
+                      window.location.reload();
                     } else {
-                      alert("Invalid password. Please try again.");
+                      alert("Authentication failed. Please try again.");
                     }
                   })
                   .catch(() => alert("Authentication failed. Please try again."));
+                } else if (password) {
+                  alert("Invalid password. Contact administrator for access.");
                 }
               }}
             >
               <User className="h-5 w-5" />
-              <span>Play as Guest</span>
+              <span>🎯 Play as Guest</span>
             </Button>
             <Button 
               variant="outline" 
