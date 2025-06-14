@@ -95,7 +95,8 @@ export default function Room() {
   const handleJoinRoom = async (name: string) => {
     try {
       const response = await apiRequest("POST", `/api/rooms/${roomId}/join`, { name });
-      const newParticipant = await response.json();
+      const data = await response.json();
+      const newParticipant = data.participant || data; // Handle both response formats
       setParticipant(newParticipant);
       setShowJoinModal(false);
       

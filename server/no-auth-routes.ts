@@ -101,6 +101,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Join room endpoint
+  app.post("/api/rooms/:id/join", async (req, res) => {
+    try {
+      const room = await storage.getRoom(req.params.id);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      const participantData = {
+        id: `participant-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+        name: req.body.name || "Anonymous",
+        roomId: req.params.id,
+        isCreator: req.body.isCreator || false
+      };
+
+      const validatedParticipant = insertParticipantSchema.parse(participantData);
+      const participant = await storage.createParticipant(validatedParticipant);
+      
+      res.json({ participant, room });
+    } catch (error) {
+      res.status(400).json({ message: "Failed to join room", error });
+    }
+  });
+
   // Create participant
   app.post("/api/participants", async (req, res) => {
     try {
