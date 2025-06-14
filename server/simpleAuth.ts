@@ -1,5 +1,6 @@
 import type { Express, RequestHandler } from "express";
 import session from "express-session";
+import bcrypt from "bcrypt";
 import { storage } from "./storage";
 
 export function getSession() {
