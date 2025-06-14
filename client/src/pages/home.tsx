@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Club, Users, Clock, BarChart3, LogIn } from "lucide-react";
 import AuthHeader from "@/components/auth-header";
+import LoginForm from "@/components/login-form";
 
 interface RoomSettings {
   name: string;

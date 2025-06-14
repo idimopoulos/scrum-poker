@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupSimpleAuth, isAuthenticated as simpleIsAuthenticated } from "./simpleAuth";
 import { insertRoomSchema, insertParticipantSchema, insertVoteSchema } from "@shared/schema";
 import { setupWebSocket } from "./websocket";
 
@@ -26,11 +27,19 @@ const DEFAULT_TIME_UNITS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  // Auth middleware - use Replit auth in development, simple auth in production
+  const isReplitEnvironment = process.env.REPLIT_DOMAINS && process.env.REPL_ID;
+  
+  if (isReplitEnvironment) {
+    await setupAuth(app);
+  } else {
+    await setupSimpleAuth(app);
+  }
+
+  const authMiddleware = isReplitEnvironment ? isAuthenticated : simpleIsAuthenticated;
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', authMiddleware, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
