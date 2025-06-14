@@ -154,7 +154,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Submit vote
+  // Submit vote (room-specific endpoint)
+  app.post("/api/rooms/:id/vote", async (req, res) => {
+    try {
+      const room = await storage.getRoom(req.params.id);
+      if (!room) {
+        return res.status(404).json({ message: "Room not found" });
+      }
+
+      const voteData = {
+        roomId: req.params.id,
+        participantId: req.body.participantId,
+        round: room.currentRound,
+        storyPoints: req.body.storyPoints,
+        timeEstimate: req.body.timeEstimate
+      };
+
+      const validatedVote = insertVoteSchema.parse(voteData);
+      const vote = await storage.createOrUpdateVote(validatedVote);
+      
+      res.json(vote);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid vote data", error });
+    }
+  });
+
+  // Submit vote (generic endpoint)
   app.post("/api/votes", async (req, res) => {
     try {
       const voteData = {
