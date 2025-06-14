@@ -6,6 +6,8 @@ import {
   type VotingHistory, type InsertVotingHistory,
   type User, type UpsertUser
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -206,9 +208,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-import { db } from "./db";
-import { eq, and } from "drizzle-orm";
-import { users, rooms, participants, votes, votingHistory } from "@shared/schema";
+
 
 // Database storage implementation
 export class DatabaseStorage implements IStorage {
