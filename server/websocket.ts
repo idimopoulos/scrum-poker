@@ -145,8 +145,8 @@ async function handleVote(clientId: string, message: VoteMessage) {
     const votes = await storage.getVotesByRoomAndRound(roomId, room.currentRound);
     
     // Check if all participants have voted for both story points and time (if dual voting)
-    const allVoted = participants.every(participant => {
-      const vote = votes.find(v => v.participantId === participant.id);
+    const allVoted = participants.every((participant: any) => {
+      const vote = votes.find((v: any) => v.participantId === participant.id);
       if (!vote) return false;
       
       if (room.dualVoting) {
@@ -185,8 +185,8 @@ async function handleNextRound(clientId: string, message: NextRoundMessage) {
   // Save current round to history if votes exist and revealed
   const votes = await storage.getVotesByRoomAndRound(roomId, room.currentRound);
   if (votes.length > 0 && room.isRevealed) {
-    const storyPointVotes = votes.filter(v => v.storyPoints).map(v => v.storyPoints!);
-    const timeVotes = votes.filter(v => v.timeEstimate).map(v => v.timeEstimate!);
+    const storyPointVotes = votes.filter((v: any) => v.storyPoints).map((v: any) => v.storyPoints!);
+    const timeVotes = votes.filter((v: any) => v.timeEstimate).map((v: any) => v.timeEstimate!);
 
     await storage.createVotingHistory({
       roomId,

@@ -211,7 +211,7 @@ export class MemStorage implements IStorage {
 
 
 // Database storage implementation
-/* Commented out until needed
+/*
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
