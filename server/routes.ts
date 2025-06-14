@@ -32,11 +32,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
+      console.log("[AUTH DEBUG] /api/auth/user called");
+      console.log("[AUTH DEBUG] req.user:", req.user);
       const userId = req.user.claims.sub;
+      console.log("[AUTH DEBUG] Looking for user ID:", userId);
       const user = await storage.getUser(userId);
+      console.log("[AUTH DEBUG] Found user:", user);
+      if (!user) {
+        console.log("[AUTH DEBUG] User not found in storage, creating...");
+        const newUser = await storage.upsertUser({
+          id: userId,
+          email: req.user.claims.email,
+          firstName: req.user.claims.first_name,
+          lastName: req.user.claims.last_name,
+          profileImageUrl: req.user.claims.profile_image_url,
+        });
+        console.log("[AUTH DEBUG] Created user:", newUser);
+        return res.json(newUser);
+      }
       res.json(user);
     } catch (error) {
-      console.error("Error fetching user:", error);
+      console.log("[AUTH DEBUG] Error in /api/auth/user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
