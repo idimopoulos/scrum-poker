@@ -133,26 +133,14 @@ export default function Home() {
             </p>
             
             <div className="max-w-md mx-auto mb-12">
-              <div className="space-y-4">
-                <Button 
-                  size="lg" 
-                  onClick={() => window.location.href = '/api/login'}
-                  className="w-full flex items-center justify-center space-x-2"
-                >
-                  <span>🔗</span>
-                  <span>Sign In with Replit</span>
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  size="lg" 
-                  onClick={() => window.location.href = '/api/auth/google'}
-                  className="w-full flex items-center justify-center space-x-2"
-                >
-                  <span>🔵</span>
-                  <span>Sign In with Google</span>
-                </Button>
-              </div>
+              <Button 
+                size="lg" 
+                onClick={() => window.location.href = '/api/login'}
+                className="w-full flex items-center justify-center space-x-2"
+              >
+                <LogIn className="h-5 w-5" />
+                <span>Sign In with Replit</span>
+              </Button>
             </div>
 
             <div className="text-center">
