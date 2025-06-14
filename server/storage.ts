@@ -206,4 +206,168 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
+import { users, rooms, participants, votes, votingHistory } from "@shared/schema";
+
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
+  // User operations
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  // Room operations - now using database
+  async createRoom(insertRoom: InsertRoom): Promise<Room> {
+    const [room] = await db
+      .insert(rooms)
+      .values({
+        id: insertRoom.id,
+        name: insertRoom.name,
+        votingSystem: insertRoom.votingSystem || "fibonacci",
+        timeUnits: insertRoom.timeUnits || "hours",
+        dualVoting: insertRoom.dualVoting ?? true,
+        autoReveal: insertRoom.autoReveal ?? false,
+        storyPointValues: insertRoom.storyPointValues || [],
+        timeValues: insertRoom.timeValues || [],
+        currentRound: 1,
+        currentDescription: "",
+        isRevealed: false,
+        createdBy: insertRoom.createdBy || null,
+      })
+      .returning();
+    return room;
+  }
+
+  async getRoom(id: string): Promise<Room | undefined> {
+    const [room] = await db.select().from(rooms).where(eq(rooms.id, id));
+    return room || undefined;
+  }
+
+  async updateRoom(id: string, updates: Partial<Room>): Promise<Room | undefined> {
+    const [room] = await db
+      .update(rooms)
+      .set(updates)
+      .where(eq(rooms.id, id))
+      .returning();
+    return room || undefined;
+  }
+
+  async createParticipant(insertParticipant: InsertParticipant): Promise<Participant> {
+    const [participant] = await db
+      .insert(participants)
+      .values({
+        id: insertParticipant.id,
+        roomId: insertParticipant.roomId,
+        name: insertParticipant.name,
+        isCreator: insertParticipant.isCreator || false,
+      })
+      .returning();
+    return participant;
+  }
+
+  async getParticipantsByRoom(roomId: string): Promise<Participant[]> {
+    return await db.select().from(participants).where(eq(participants.roomId, roomId));
+  }
+
+  async getParticipant(id: string): Promise<Participant | undefined> {
+    const [participant] = await db.select().from(participants).where(eq(participants.id, id));
+    return participant || undefined;
+  }
+
+  async removeParticipant(id: string): Promise<void> {
+    await db.delete(participants).where(eq(participants.id, id));
+  }
+
+  async createOrUpdateVote(insertVote: InsertVote): Promise<Vote> {
+    // Check if vote exists for this participant and round
+    const [existingVote] = await db
+      .select()
+      .from(votes)
+      .where(
+        and(
+          eq(votes.participantId, insertVote.participantId),
+          eq(votes.round, insertVote.round)
+        )
+      );
+
+    if (existingVote) {
+      const [updatedVote] = await db
+        .update(votes)
+        .set({
+          storyPoints: insertVote.storyPoints || existingVote.storyPoints,
+          timeEstimate: insertVote.timeEstimate || existingVote.timeEstimate,
+          votedAt: new Date(),
+        })
+        .where(eq(votes.id, existingVote.id))
+        .returning();
+      return updatedVote;
+    } else {
+      const [vote] = await db
+        .insert(votes)
+        .values({
+          participantId: insertVote.participantId,
+          roomId: insertVote.roomId,
+          round: insertVote.round,
+          storyPoints: insertVote.storyPoints || null,
+          timeEstimate: insertVote.timeEstimate || null,
+        })
+        .returning();
+      return vote;
+    }
+  }
+
+  async getVotesByRoomAndRound(roomId: string, round: number): Promise<Vote[]> {
+    return await db
+      .select()
+      .from(votes)
+      .where(and(eq(votes.roomId, roomId), eq(votes.round, round)));
+  }
+
+  async getVoteByParticipantAndRound(participantId: string, round: number): Promise<Vote | undefined> {
+    const [vote] = await db
+      .select()
+      .from(votes)
+      .where(and(eq(votes.participantId, participantId), eq(votes.round, round)));
+    return vote || undefined;
+  }
+
+  async createVotingHistory(insertHistory: InsertVotingHistory): Promise<VotingHistory> {
+    const [history] = await db
+      .insert(votingHistory)
+      .values(insertHistory)
+      .returning();
+    return history;
+  }
+
+  async getVotingHistoryByRoom(roomId: string): Promise<VotingHistory[]> {
+    return await db
+      .select()
+      .from(votingHistory)
+      .where(eq(votingHistory.roomId, roomId))
+      .orderBy(votingHistory.round);
+  }
+}
+
+export const storage = new DatabaseStorage();

@@ -10,6 +10,7 @@ import { storage } from "./storage";
 
 // Check if we're in a Replit environment - only use OAuth if we're actually running on Replit
 const isActuallyOnReplit = process.env.REPLIT_DOMAINS && process.env.REPLIT_DOMAINS.includes('.replit.dev');
+const isProductionDeployment = process.env.NODE_ENV === 'production' && !isActuallyOnReplit;
 const isReplitEnvironment = isActuallyOnReplit && process.env.REPL_ID;
 
 console.log("[AUTH DEBUG] Environment check:");
@@ -17,6 +18,7 @@ console.log("- REPLIT_DOMAINS:", process.env.REPLIT_DOMAINS);
 console.log("- REPL_ID:", process.env.REPL_ID ? "SET" : "NOT SET");
 console.log("- NODE_ENV:", process.env.NODE_ENV);
 console.log("- isActuallyOnReplit:", isActuallyOnReplit);
+console.log("- isProductionDeployment:", isProductionDeployment);
 console.log("- isReplitEnvironment:", isReplitEnvironment);
 
 // For production deployment outside Replit, disable OAuth and use simple session-based auth
