@@ -22,10 +22,10 @@ const roomClients = new Map<string, Set<string>>();
 export function setupWebSocket(server: Server) {
   const wss = new WebSocketServer({ 
     server,
-    path: '/api/ws'
+    path: '/ws'
   });
 
-  console.log('WebSocket server initialized on path /api/ws');
+  console.log('WebSocket server initialized on path /ws');
 
   wss.on('error', (error) => {
     console.error('WebSocket server error:', error);

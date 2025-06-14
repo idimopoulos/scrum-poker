@@ -12,10 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
-import { Club, Users, Clock, BarChart3, LogIn } from "lucide-react";
-import AuthHeader from "@/components/auth-header";
-import LoginForm from "@/components/login-form";
+import { Club, Users, Clock, BarChart3, Plus, ArrowRight } from "lucide-react";
 
 interface RoomSettings {
   name: string;
@@ -28,10 +25,7 @@ interface RoomSettings {
   autoReveal: boolean;
 }
 
-
-
 export default function Home() {
-  const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [joinRoomId, setJoinRoomId] = useState("");
@@ -48,7 +42,6 @@ export default function Home() {
 
   const createRoomMutation = useMutation({
     mutationFn: async (settings: RoomSettings) => {
-      // Convert the new format to the backend format
       const backendSettings = {
         name: settings.name,
         votingSystem: settings.voteForStoryPoints ? settings.storyPointsSystem : "fibonacci",
@@ -81,10 +74,6 @@ export default function Home() {
     },
   });
 
-  const handleCreateRoom = () => {
-    createRoomMutation.mutate(roomSettings);
-  };
-
   const handleJoinRoom = () => {
     if (!joinRoomId.trim()) {
       toast({
@@ -97,349 +86,220 @@ export default function Home() {
     setLocation(`/room/${joinRoomId.toUpperCase()}`);
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-        <header className="bg-white shadow-sm border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center space-x-2">
-                <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                  <span className="text-white text-lg">🃏</span>
-                </div>
-                <h1 className="text-xl font-semibold text-slate-800">Scrum Poker</h1>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
-              Plan Better,
-              <span className="text-primary"> Estimate Smarter</span>
-            </h1>
-            <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-              Real-time Scrum poker for agile teams. Streamline your planning sessions with 
-              collaborative estimation, dual voting systems, and comprehensive analytics.
-            </p>
-            
-            <div className="max-w-md mx-auto mb-12">
-              <Button 
-                size="lg" 
-                onClick={() => window.location.href = '/api/login'}
-                className="w-full flex items-center justify-center space-x-2"
-              >
-                <LogIn className="h-5 w-5" />
-                <span>Sign In with Replit</span>
-              </Button>
-            </div>
-
-            <div className="text-center">
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => {
-                  const roomId = prompt("Enter room ID to join:");
-                  if (roomId) window.location.href = `/room/${roomId}`;
-                }}
-              >
-                Join Existing Room as Guest
-              </Button>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Users className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Real-time Collaboration</h3>
-                <p className="text-slate-600">
-                  Vote simultaneously with your team. See results update in real-time with automatic fallback to polling.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6 text-center">
-                <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Dual Voting System</h3>
-                <p className="text-slate-600">
-                  Estimate both story points and time. Customize voting systems to match your team's workflow.
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardContent className="p-6 text-center">
-                <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Comprehensive Analytics</h3>
-                <p className="text-slate-600">
-                  Track voting history, analyze consensus patterns, and improve estimation accuracy over time.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
       <header className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Club className="h-6 w-6 text-white" />
+                <span className="text-white text-lg">🃏</span>
               </div>
               <h1 className="text-xl font-semibold text-slate-800">Scrum Poker</h1>
             </div>
-            <AuthHeader />
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-800 mb-2">Create Your Planning Session</h1>
-          <p className="text-slate-600 text-lg">
-            Set up a new room with custom settings for your team's estimation needs
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6">
+            Plan Better,
+            <span className="text-primary"> Estimate Smarter</span>
+          </h1>
+          <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
+            Real-time Scrum poker for agile teams. Streamline your planning sessions with 
+            collaborative estimation, dual voting systems, and comprehensive analytics.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Create Room */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Room</CardTitle>
+        <div className="grid lg:grid-cols-2 gap-12 mb-16">
+          {/* Create Room Section */}
+          <Card className="p-6">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center space-x-2">
+                <Plus className="h-5 w-5" />
+                <span>Create New Room</span>
+              </CardTitle>
               <CardDescription>
-                Set up a new planning session with custom settings
+                Set up a new estimation session for your team
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="roomName">Room Name</Label>
+                <Label htmlFor="room-name">Room Name</Label>
                 <Input
-                  id="roomName"
+                  id="room-name"
                   value={roomSettings.name}
-                  onChange={(e) =>
-                    setRoomSettings({ ...roomSettings, name: e.target.value })
-                  }
-                  placeholder="Planning Session"
+                  onChange={(e) => setRoomSettings({ ...roomSettings, name: e.target.value })}
+                  placeholder="Enter room name"
                 />
               </div>
 
               <div className="space-y-4">
-                <Label className="text-base font-medium">Vote for:</Label>
-                
-                {/* Story Points Section */}
+                <Label>Voting Options</Label>
                 <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="voteForStoryPoints"
+                      id="story-points"
                       checked={roomSettings.voteForStoryPoints}
                       onCheckedChange={(checked) =>
-                        setRoomSettings({ ...roomSettings, voteForStoryPoints: !!checked })
+                        setRoomSettings({ ...roomSettings, voteForStoryPoints: checked as boolean })
                       }
                     />
-                    <Label htmlFor="voteForStoryPoints">Story points (complexity)</Label>
+                    <Label htmlFor="story-points">Vote for Story Points</Label>
                   </div>
-                  
-                  {roomSettings.voteForStoryPoints && (
-                    <div className="ml-6 space-y-2">
-                      <Label htmlFor="storyPointsSystem" className="text-sm">Voting System</Label>
-                      <Select
-                        value={roomSettings.storyPointsSystem}
-                        onValueChange={(value) => {
-                          let defaultValues = "1, 2, 3, 5, 8, 13, 21, ?";
-                          if (value === "tshirt") {
-                            defaultValues = "XS, S, M, L, XL, XXL, ?";
-                          } else if (value === "custom") {
-                            defaultValues = "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?";
-                          }
-                          setRoomSettings({ 
-                            ...roomSettings, 
-                            storyPointsSystem: value,
-                            storyPointsValues: defaultValues
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="fibonacci">Fibonacci</SelectItem>
-                          <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
-                          <SelectItem value="custom">Custom</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <div className="space-y-1">
-                        <Label htmlFor="storyPointsValues" className="text-sm text-slate-600">Values</Label>
-                        <Textarea
-                          id="storyPointsValues"
-                          value={roomSettings.storyPointsValues}
-                          onChange={(e) =>
-                            setRoomSettings({ ...roomSettings, storyPointsValues: e.target.value })
-                          }
-                          disabled={roomSettings.storyPointsSystem !== "custom"}
-                          className="h-16 text-sm"
-                          placeholder="Enter values separated by commas"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Time Estimation Section */}
-                <div className="space-y-3">
                   <div className="flex items-center space-x-2">
                     <Checkbox
-                      id="voteForTime"
+                      id="time-estimate"
                       checked={roomSettings.voteForTime}
                       onCheckedChange={(checked) =>
-                        setRoomSettings({ ...roomSettings, voteForTime: !!checked })
+                        setRoomSettings({ ...roomSettings, voteForTime: checked as boolean })
                       }
                     />
-                    <Label htmlFor="voteForTime">Time</Label>
+                    <Label htmlFor="time-estimate">Vote for Time Estimate</Label>
                   </div>
-                  
-                  {roomSettings.voteForTime && (
-                    <div className="ml-6 space-y-2">
-                      <Label htmlFor="timeUnits" className="text-sm">Time Units</Label>
-                      <Select
-                        value={roomSettings.timeUnits}
-                        onValueChange={(value) => {
-                          let defaultValues = "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?";
-                          if (value === "days") {
-                            defaultValues = "0.5, 1, 1.5, 2, 2.5, 3, 5, ?";
-                          }
-                          setRoomSettings({ 
-                            ...roomSettings, 
-                            timeUnits: value,
-                            timeValues: defaultValues
-                          });
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="hours">Hours</SelectItem>
-                          <SelectItem value="days">Days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      
-                      <div className="space-y-1">
-                        <Label htmlFor="timeValues" className="text-sm text-slate-600">Values</Label>
-                        <Textarea
-                          id="timeValues"
-                          value={roomSettings.timeValues}
-                          onChange={(e) =>
-                            setRoomSettings({ ...roomSettings, timeValues: e.target.value })
-                          }
-                          className="h-16 text-sm"
-                          placeholder="Enter values separated by commas"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <Label htmlFor="autoReveal">Auto-reveal when all voted</Label>
+              {roomSettings.voteForStoryPoints && (
+                <div className="space-y-2">
+                  <Label htmlFor="story-system">Story Points System</Label>
+                  <Select
+                    value={roomSettings.storyPointsSystem}
+                    onValueChange={(value) => {
+                      const systems = {
+                        fibonacci: "1, 2, 3, 5, 8, 13, 21, ?",
+                        modified_fibonacci: "0, 1/2, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?",
+                        tshirt: "XS, S, M, L, XL, XXL, ?",
+                        powers_of_2: "1, 2, 4, 8, 16, 32, ?",
+                        linear: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
+                      };
+                      setRoomSettings({
+                        ...roomSettings,
+                        storyPointsSystem: value,
+                        storyPointsValues: systems[value as keyof typeof systems] || systems.fibonacci
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fibonacci">Fibonacci</SelectItem>
+                      <SelectItem value="modified_fibonacci">Modified Fibonacci</SelectItem>
+                      <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
+                      <SelectItem value="powers_of_2">Powers of 2</SelectItem>
+                      <SelectItem value="linear">Linear</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {roomSettings.voteForTime && (
+                <div className="space-y-2">
+                  <Label htmlFor="time-units">Time Units</Label>
+                  <Select
+                    value={roomSettings.timeUnits}
+                    onValueChange={(value) => {
+                      const units = {
+                        minutes: "5, 10, 15, 30, 45, 60, 90, 120, ?",
+                        hours: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
+                        days: "0.5, 1, 1.5, 2, 2.5, 3, 5, ?"
+                      };
+                      setRoomSettings({
+                        ...roomSettings,
+                        timeUnits: value,
+                        timeValues: units[value as keyof typeof units] || units.hours
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="hours">Hours</SelectItem>
+                      <SelectItem value="days">Days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="flex items-center space-x-2">
                 <Switch
-                  id="autoReveal"
+                  id="auto-reveal"
                   checked={roomSettings.autoReveal}
                   onCheckedChange={(checked) =>
                     setRoomSettings({ ...roomSettings, autoReveal: checked })
                   }
                 />
+                <Label htmlFor="auto-reveal">Auto-reveal votes when everyone has voted</Label>
               </div>
 
               <Button
-                onClick={handleCreateRoom}
+                onClick={() => createRoomMutation.mutate(roomSettings)}
+                disabled={createRoomMutation.isPending}
                 className="w-full"
-                disabled={createRoomMutation.isPending || (!roomSettings.voteForStoryPoints && !roomSettings.voteForTime)}
+                size="lg"
               >
                 {createRoomMutation.isPending ? "Creating..." : "Create Room"}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
 
-          {/* Join Room */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Join Existing Room</CardTitle>
-              <CardDescription>
-                Enter a room code to join an existing planning session
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="roomId">Room Code</Label>
-                <Input
-                  id="roomId"
-                  value={joinRoomId}
-                  onChange={(e) => setJoinRoomId(e.target.value.toUpperCase())}
-                  placeholder="ABC-123"
-                  className="text-center font-mono text-lg tracking-wider"
-                />
-              </div>
+          {/* Join Room Section */}
+          <div className="space-y-6">
+            <Card className="p-6">
+              <CardHeader className="pb-4">
+                <CardTitle>Join Existing Room</CardTitle>
+                <CardDescription>
+                  Enter a room ID to join an ongoing session
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="room-id">Room ID</Label>
+                  <Input
+                    id="room-id"
+                    value={joinRoomId}
+                    onChange={(e) => setJoinRoomId(e.target.value.toUpperCase())}
+                    placeholder="Enter room ID (e.g., ABC123)"
+                    className="uppercase"
+                  />
+                </div>
+                <Button onClick={handleJoinRoom} className="w-full" size="lg">
+                  Join Room
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </CardContent>
+            </Card>
 
-              <Button onClick={handleJoinRoom} className="w-full" size="lg">
-                Join Room
-              </Button>
-
-              <Separator />
-
-              <div className="text-center text-sm text-slate-600">
-                <p>Don't have a room code?</p>
-                <p>Ask your team lead to share the room link or create a new room above.</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <div className="text-center">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <Club className="h-6 w-6 text-blue-600" />
+            {/* Features Grid */}
+            <div className="grid gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Users className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h3 className="font-semibold mb-1">Real-time Collaboration</h3>
+                  <p className="text-sm text-slate-600">Collaborate with your team in real-time with instant vote synchronization.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h3 className="font-semibold mb-1">Dual Voting System</h3>
+                  <p className="text-sm text-slate-600">Estimate both story points and time for comprehensive planning.</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h3 className="font-semibold mb-1">Analytics & History</h3>
+                  <p className="text-sm text-slate-600">Track estimation accuracy with detailed voting history and statistics.</p>
+                </CardContent>
+              </Card>
             </div>
-            <h3 className="font-semibold text-slate-800 mb-2">Easy Voting</h3>
-            <p className="text-sm text-slate-600">
-              Quick and intuitive card-based voting for story points and time estimation
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <div className="w-6 h-6 bg-green-600 rounded-full"></div>
-            </div>
-            <h3 className="font-semibold text-slate-800 mb-2">Real-time Sync</h3>
-            <p className="text-sm text-slate-600">
-              See votes and updates from your team members in real-time
-            </p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <div className="w-6 h-6 text-purple-600">📊</div>
-            </div>
-            <h3 className="font-semibold text-slate-800 mb-2">Vote History</h3>
-            <p className="text-sm text-slate-600">
-              Track all your votes with detailed statistics and averages
-            </p>
           </div>
         </div>
       </main>
