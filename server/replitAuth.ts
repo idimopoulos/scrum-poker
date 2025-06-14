@@ -21,9 +21,10 @@ console.log("- NODE_ENV:", process.env.NODE_ENV);
 console.log("- isActuallyOnReplit:", isActuallyOnReplit);
 console.log("- isProductionDeployment:", isProductionDeployment);
 console.log("- isReplitEnvironment:", isReplitEnvironment);
+console.log("- isCustomDomain:", isCustomDomain);
 
 // For production deployment outside Replit, disable OAuth and use simple session-based auth
-if (!isReplitEnvironment) {
+if (!isReplitEnvironment || isCustomDomain) {
   console.log("[AUTH DEBUG] Running in production mode without Replit OAuth - using simple authentication");
 } else {
   console.log("[AUTH DEBUG] Running with Replit OAuth enabled");
@@ -96,7 +97,46 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  if (isReplitEnvironment && !isCustomDomain) {
+  // Use simple auth for custom domains or production deployments
+  if (!isReplitEnvironment || isCustomDomain) {
+    console.log("[AUTH DEBUG] Setting up simple production authentication...");
+    // Production mode - simplified authentication
+    app.get("/api/login", (req, res) => {
+      console.log("[AUTH DEBUG] Login request received for domain:", req.hostname);
+      // Create a demo user for production
+      const user = {
+        claims: {
+          sub: "demo-user-" + Date.now(),
+          email: "demo@example.com",
+          first_name: "Demo",
+          last_name: "User",
+          profile_image_url: null,
+          exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+        }
+      };
+      
+      console.log("[AUTH DEBUG] Creating user session:", user.claims.sub);
+      req.login(user, async (err) => {
+        if (err) {
+          console.log("[AUTH DEBUG] Login error:", err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        
+        console.log("[AUTH DEBUG] Session created, upserting user");
+        // Create user in database
+        await upsertUser(user.claims);
+        
+        console.log("[AUTH DEBUG] Redirecting to home");
+        res.redirect("/");
+      });
+    });
+
+    app.get("/api/logout", (req, res) => {
+      req.logout(() => {
+        res.redirect("/");
+      });
+    });
+  } else if (isReplitEnvironment && !isCustomDomain) {
     console.log("[AUTH DEBUG] Setting up Replit OAuth...");
     // Setup Replit OAuth for development
     const config = await getOidcConfig();
