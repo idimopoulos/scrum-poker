@@ -242,20 +242,7 @@ export class DatabaseStorage implements IStorage {
   async createRoom(insertRoom: InsertRoom): Promise<Room> {
     const [room] = await db
       .insert(rooms)
-      .values({
-        id: insertRoom.id,
-        name: insertRoom.name,
-        votingSystem: insertRoom.votingSystem || "fibonacci",
-        timeUnits: insertRoom.timeUnits || "hours",
-        dualVoting: insertRoom.dualVoting ?? true,
-        autoReveal: insertRoom.autoReveal ?? false,
-        storyPointValues: insertRoom.storyPointValues || [],
-        timeValues: insertRoom.timeValues || [],
-        currentRound: 1,
-        currentDescription: "",
-        isRevealed: false,
-        createdBy: insertRoom.createdBy || null,
-      })
+      .values(insertRoom)
       .returning();
     return room;
   }

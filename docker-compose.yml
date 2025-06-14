@@ -9,6 +9,11 @@ services:
       - NODE_ENV=production
       - PORT=5000
       - DATABASE_URL=postgresql://scrumpoker:scrumpoker@postgres:5432/scrumpoker
+      - REPL_ID=${REPL_ID}
+      - REPLIT_DOMAINS=${REPLIT_DOMAINS}
+      - SESSION_SECRET=${SESSION_SECRET}
+    env_file:
+      - .env
     volumes:
       - /app/node_modules
     restart: unless-stopped
