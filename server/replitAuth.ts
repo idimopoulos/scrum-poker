@@ -149,11 +149,12 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: "Invalid password" });
       }
       
-      // Create a guest user session
+      // Create a guest user session with unique email
+      const guestId = "guest-user-" + Date.now();
       const user = {
         claims: {
-          sub: "guest-user-" + Date.now(),
-          email: "guest@scrumpoker.local",
+          sub: guestId,
+          email: `${guestId}@scrumpoker.local`,
           first_name: "Guest",
           last_name: "User",
           profile_image_url: null,
@@ -284,11 +285,12 @@ export async function setupAuth(app: Express) {
         return res.status(401).json({ message: "Invalid password" });
       }
       
-      // Create a guest user session
+      // Create a guest user session with unique email
+      const guestId = "guest-user-" + Date.now();
       const user = {
         claims: {
-          sub: "guest-user-" + Date.now(),
-          email: "guest@scrumpoker.local",
+          sub: guestId,
+          email: `${guestId}@scrumpoker.local`,
           first_name: "Guest",
           last_name: "User",
           profile_image_url: null,
