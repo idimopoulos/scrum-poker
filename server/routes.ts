@@ -26,9 +26,27 @@ const DEFAULT_TIME_UNITS = {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Create a new room
   app.post("/api/rooms", async (req, res) => {
     try {
+      // Check if user is authenticated
+      const userId = req.isAuthenticated() ? (req.user as any)?.claims?.sub : null;
+      
       const roomData = {
         id: generateRoomId(),
         name: req.body.name || "Planning Session",
@@ -40,7 +58,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timeValues: req.body.timeValues || DEFAULT_TIME_UNITS[req.body.timeUnits as keyof typeof DEFAULT_TIME_UNITS] || DEFAULT_TIME_UNITS.hours,
         currentRound: 1,
         currentDescription: "",
-        isRevealed: false
+        isRevealed: false,
+        createdBy: userId
       };
 
       const validatedRoom = insertRoomSchema.parse(roomData);

@@ -18,6 +18,7 @@ import ParticipantsPanel from "@/components/participants-panel";
 import StatsPanel from "@/components/stats-panel";
 import ShareModal from "@/components/share-modal";
 import JoinModal from "@/components/join-modal";
+import AuthHeader from "@/components/auth-header";
 
 
 export default function Room() {
