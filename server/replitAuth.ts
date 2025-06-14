@@ -136,6 +136,46 @@ export async function setupAuth(app: Express) {
         res.redirect("/");
       });
     });
+
+    // Guest authentication endpoint with password protection
+    app.post("/api/guest-login", (req, res) => {
+      const { password } = req.body;
+      const GUEST_PASSWORD = "FOoM30Ws68PSpickSxrnGmStuD1OsaM";
+      
+      console.log("[AUTH DEBUG] Guest login attempt");
+      
+      if (password !== GUEST_PASSWORD) {
+        console.log("[AUTH DEBUG] Invalid guest password");
+        return res.status(401).json({ message: "Invalid password" });
+      }
+      
+      // Create a guest user session
+      const user = {
+        claims: {
+          sub: "guest-user-" + Date.now(),
+          email: "guest@scrumpoker.local",
+          first_name: "Guest",
+          last_name: "User",
+          profile_image_url: null,
+          exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+        }
+      };
+      
+      console.log("[AUTH DEBUG] Creating guest session:", user.claims.sub);
+      req.login(user, async (err) => {
+        if (err) {
+          console.log("[AUTH DEBUG] Guest login error:", err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        
+        console.log("[AUTH DEBUG] Guest session created, upserting user");
+        // Create user in database
+        await upsertUser(user.claims);
+        
+        console.log("[AUTH DEBUG] Guest authenticated successfully");
+        res.json({ success: true, message: "Guest authentication successful" });
+      });
+    });
   } else if (isReplitEnvironment && !isCustomDomain) {
     console.log("[AUTH DEBUG] Setting up Replit OAuth...");
     // Setup Replit OAuth for development
@@ -229,6 +269,46 @@ export async function setupAuth(app: Express) {
             post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
           }).href
         );
+      });
+    });
+
+    // Guest authentication endpoint with password protection (also available in Replit mode)
+    app.post("/api/guest-login", (req, res) => {
+      const { password } = req.body;
+      const GUEST_PASSWORD = "FOoM30Ws68PSpickSxrnGmStuD1OsaM";
+      
+      console.log("[AUTH DEBUG] Guest login attempt");
+      
+      if (password !== GUEST_PASSWORD) {
+        console.log("[AUTH DEBUG] Invalid guest password");
+        return res.status(401).json({ message: "Invalid password" });
+      }
+      
+      // Create a guest user session
+      const user = {
+        claims: {
+          sub: "guest-user-" + Date.now(),
+          email: "guest@scrumpoker.local",
+          first_name: "Guest",
+          last_name: "User",
+          profile_image_url: null,
+          exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // 7 days
+        }
+      };
+      
+      console.log("[AUTH DEBUG] Creating guest session:", user.claims.sub);
+      req.login(user, async (err) => {
+        if (err) {
+          console.log("[AUTH DEBUG] Guest login error:", err);
+          return res.status(500).json({ error: "Login failed" });
+        }
+        
+        console.log("[AUTH DEBUG] Guest session created, upserting user");
+        // Create user in database
+        await upsertUser(user.claims);
+        
+        console.log("[AUTH DEBUG] Guest authenticated successfully");
+        res.json({ success: true, message: "Guest authentication successful" });
       });
     });
   }

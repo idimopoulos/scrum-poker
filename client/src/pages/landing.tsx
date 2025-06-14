@@ -1,7 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Clock, BarChart3, LogIn } from "lucide-react";
+import { Users, Clock, BarChart3, LogIn, User } from "lucide-react";
 import AuthHeader from "@/components/auth-header";
+import GuestLoginModal from "@/components/guest-login-modal";
 
 export default function LandingPage() {
   return (
@@ -39,6 +40,16 @@ export default function LandingPage() {
               <LogIn className="h-5 w-5" />
               <span>Sign In to Create Room</span>
             </Button>
+            <GuestLoginModal>
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="flex items-center space-x-2"
+              >
+                <User className="h-5 w-5" />
+                <span>Play as Guest</span>
+              </Button>
+            </GuestLoginModal>
             <Button 
               variant="outline" 
               size="lg"
