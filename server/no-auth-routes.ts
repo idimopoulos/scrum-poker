@@ -116,11 +116,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isCreator: req.body.isCreator || false
       };
 
+      console.log("Generated participant data:", participantData);
       const validatedParticipant = insertParticipantSchema.parse(participantData);
+      console.log("Validated participant data:", validatedParticipant);
       const participant = await storage.createParticipant(validatedParticipant);
       
       res.json({ participant, room });
     } catch (error) {
+      console.error("Join room error:", error);
       res.status(400).json({ message: "Failed to join room", error });
     }
   });

@@ -83,7 +83,6 @@ export const insertRoomSchema = createInsertSchema(rooms).omit({
 });
 
 export const insertParticipantSchema = createInsertSchema(participants).omit({
-  id: true,
   joinedAt: true,
 });
 
