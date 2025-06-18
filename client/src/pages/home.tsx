@@ -16,6 +16,7 @@ import { Club, Users, Clock, BarChart3, Plus, ArrowRight } from "lucide-react";
 
 interface RoomSettings {
   name: string;
+  creatorName: string;
   voteForStoryPoints: boolean;
   voteForTime: boolean;
   storyPointsSystem: string;
@@ -31,6 +32,7 @@ export default function Home() {
   const [joinRoomId, setJoinRoomId] = useState("");
   const [roomSettings, setRoomSettings] = useState<RoomSettings>({
     name: "Planning Session",
+    creatorName: "Room Creator",
     voteForStoryPoints: true,
     voteForTime: true,
     storyPointsSystem: "fibonacci",
@@ -133,6 +135,16 @@ export default function Home() {
                   value={roomSettings.name}
                   onChange={(e) => setRoomSettings({ ...roomSettings, name: e.target.value })}
                   placeholder="Enter room name"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="creator-name">Your Name</Label>
+                <Input
+                  id="creator-name"
+                  value={roomSettings.creatorName}
+                  onChange={(e) => setRoomSettings({ ...roomSettings, creatorName: e.target.value })}
+                  placeholder="Enter your name"
                 />
               </div>
 

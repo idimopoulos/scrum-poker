@@ -159,6 +159,8 @@ interface ParticipantsPanelProps {
   dualVoting: boolean;
   isRevealed: boolean;
   votingProgress: number;
+  currentParticipant: Participant | null;
+  onKickParticipant?: (participantId: string) => void;
 }
 
 export default function ParticipantsPanel({ 
@@ -166,7 +168,9 @@ export default function ParticipantsPanel({
   votes, 
   dualVoting, 
   isRevealed, 
-  votingProgress 
+  votingProgress,
+  currentParticipant,
+  onKickParticipant
 }: ParticipantsPanelProps) {
   const getParticipantInitials = (name: string) => {
     return name
@@ -206,7 +210,7 @@ export default function ParticipantsPanel({
             const hasTimeVote = vote?.timeEstimate !== null && vote?.timeEstimate !== undefined;
             
             return (
-              <div key={participant.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+              <div key={participant.id} className="relative flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className={cn(
                     "w-8 h-8 rounded-full flex items-center justify-center",
@@ -260,6 +264,20 @@ export default function ParticipantsPanel({
                     </div>
                   )}
                 </div>
+                
+                {/* Kick button - only show for room creator and not for themselves */}
+                {currentParticipant?.isCreator && 
+                 !participant.isCreator && 
+                 onKickParticipant && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute -top-1 -right-1 h-6 w-6 p-0 rounded-full bg-red-500 hover:bg-red-600"
+                    onClick={() => onKickParticipant(participant.id)}
+                  >
+                    <X className="h-3 w-3 text-white" />
+                  </Button>
+                )}
               </div>
             );
           })}
