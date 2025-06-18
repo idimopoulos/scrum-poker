@@ -6,41 +6,86 @@ import type { Participant, Vote } from "@shared/schema";
 // Voting Statistics Component
 interface VotingStatisticsProps {
   votes: Vote[];
+  participants: Participant[];
   isRevealed: boolean;
   dualVoting: boolean;
 }
 
-function VotingStatistics({ votes, isRevealed, dualVoting }: VotingStatisticsProps) {
-  const calculateStats = (values: string[]) => {
-    if (values.length === 0 || !isRevealed) {
-      return { avg: "-", min: "-", max: "-" };
+function VotingStatistics({ votes, participants, isRevealed, dualVoting }: VotingStatisticsProps) {
+  const calculateStats = (votesWithValues: Array<{value: string, participantId: string}>) => {
+    if (votesWithValues.length === 0 || !isRevealed) {
+      return { avg: "-", min: "-", max: "-", minParticipants: [], maxParticipants: [] };
     }
 
-    // Filter out non-numeric values for calculation
-    const numericValues = values.map(v => {
-      if (v === "?") return 0;
-      // Handle T-shirt sizes
-      const tshirtMap: Record<string, number> = {
-        'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6
+    // Convert values to numeric for comparison
+    const valueMap = new Map<string, number>();
+    const tshirtMap: Record<string, number> = {
+      'XS': 1, 'S': 2, 'M': 3, 'L': 4, 'XL': 5, 'XXL': 6
+    };
+
+    const processedVotes = votesWithValues.map(vote => {
+      let numericValue: number;
+      if (vote.value === "?") {
+        numericValue = 0;
+      } else if (tshirtMap[vote.value]) {
+        numericValue = tshirtMap[vote.value];
+      } else {
+        const parsed = parseFloat(vote.value);
+        numericValue = isNaN(parsed) ? 0 : parsed;
+      }
+      
+      return {
+        ...vote,
+        numericValue,
+        originalValue: vote.value
       };
-      if (tshirtMap[v]) return tshirtMap[v];
-      const parsed = parseFloat(v);
-      return isNaN(parsed) ? 0 : parsed;
-    }).filter(v => v > 0);
+    }).filter(v => v.numericValue > 0);
 
-    if (numericValues.length === 0) {
-      return { avg: "-", min: "-", max: "-" };
+    if (processedVotes.length === 0) {
+      return { avg: "-", min: "-", max: "-", minParticipants: [], maxParticipants: [] };
     }
 
+    const numericValues = processedVotes.map(v => v.numericValue);
     const avg = (numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length).toFixed(1);
-    const min = Math.min(...numericValues).toString();
-    const max = Math.max(...numericValues).toString();
+    const minValue = Math.min(...numericValues);
+    const maxValue = Math.max(...numericValues);
 
-    return { avg, min, max };
+    // Find participants with min and max values
+    const minVotes = processedVotes.filter(v => v.numericValue === minValue);
+    const maxVotes = processedVotes.filter(v => v.numericValue === maxValue);
+
+    const getParticipantName = (participantId: string) => {
+      const participant = participants.find(p => p.id === participantId);
+      return participant?.name || 'Unknown';
+    };
+
+    const minParticipants = minVotes.map(v => ({
+      name: getParticipantName(v.participantId),
+      value: v.originalValue
+    }));
+
+    const maxParticipants = maxVotes.map(v => ({
+      name: getParticipantName(v.participantId),
+      value: v.originalValue
+    }));
+
+    return { 
+      avg, 
+      min: minVotes[0]?.originalValue || "-", 
+      max: maxVotes[0]?.originalValue || "-",
+      minParticipants,
+      maxParticipants
+    };
   };
 
-  const storyPointVotes = votes.filter(v => v.storyPoints).map(v => v.storyPoints!);
-  const timeVotes = votes.filter(v => v.timeEstimate).map(v => v.timeEstimate!);
+  const storyPointVotes = votes.filter(v => v.storyPoints).map(v => ({ 
+    value: v.storyPoints!, 
+    participantId: v.participantId 
+  }));
+  const timeVotes = votes.filter(v => v.timeEstimate).map(v => ({ 
+    value: v.timeEstimate!, 
+    participantId: v.participantId 
+  }));
 
   const storyStats = calculateStats(storyPointVotes);
   const timeStats = calculateStats(timeVotes);
@@ -57,10 +102,20 @@ function VotingStatistics({ votes, isRevealed, dualVoting }: VotingStatisticsPro
           <div>
             <div className="text-slate-500 mb-1">Min</div>
             <div className="font-medium text-slate-700">{storyStats.min}</div>
+            {storyStats.minParticipants.length > 0 && (
+              <div className="text-xs text-slate-400 mt-1 leading-tight">
+                {storyStats.minParticipants.map(p => p.name).join(', ')}
+              </div>
+            )}
           </div>
           <div>
             <div className="text-slate-500 mb-1">Max</div>
             <div className="font-medium text-slate-700">{storyStats.max}</div>
+            {storyStats.maxParticipants.length > 0 && (
+              <div className="text-xs text-slate-400 mt-1 leading-tight">
+                {storyStats.maxParticipants.map(p => p.name).join(', ')}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -76,10 +131,20 @@ function VotingStatistics({ votes, isRevealed, dualVoting }: VotingStatisticsPro
             <div>
               <div className="text-slate-500 mb-1">Min</div>
               <div className="font-medium text-slate-700">{timeStats.min}</div>
+              {timeStats.minParticipants.length > 0 && (
+                <div className="text-xs text-slate-400 mt-1 leading-tight">
+                  {timeStats.minParticipants.map(p => p.name).join(', ')}
+                </div>
+              )}
             </div>
             <div>
               <div className="text-slate-500 mb-1">Max</div>
               <div className="font-medium text-slate-700">{timeStats.max}</div>
+              {timeStats.maxParticipants.length > 0 && (
+                <div className="text-xs text-slate-400 mt-1 leading-tight">
+                  {timeStats.maxParticipants.map(p => p.name).join(', ')}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -214,6 +279,7 @@ export default function ParticipantsPanel({
           {/* Voting Statistics */}
           <VotingStatistics 
             votes={votes} 
+            participants={participants}
             isRevealed={isRevealed} 
             dualVoting={dualVoting} 
           />
