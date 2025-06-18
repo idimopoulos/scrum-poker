@@ -275,6 +275,38 @@ async function handleNextRound(clientId: string, message: NextRoundMessage) {
   await broadcastRoomUpdate(roomId);
 }
 
+async function handleKickParticipant(clientId: string, message: KickParticipantMessage) {
+  const { roomId, participantId } = message.payload;
+  const client = clients.get(clientId);
+  if (!client || client.roomId !== roomId) return;
+
+  const room = await storage.getRoom(roomId);
+  if (!room) return;
+
+  // Only room creator can kick participants
+  const creatorParticipant = await storage.getParticipant(client.participantId!);
+  if (!creatorParticipant?.isCreator) return;
+
+  const participantToKick = await storage.getParticipant(participantId);
+  if (!participantToKick || participantToKick.isCreator) return;
+
+  console.log(`Kicking participant ${participantToKick.name} from room ${roomId}`);
+
+  // Remove the participant
+  await storage.removeParticipant(participantId);
+
+  // Find and disconnect the kicked participant's WebSocket connection
+  for (const [kickClientId, kickClient] of Array.from(clients.entries())) {
+    if (kickClient.participantId === participantId) {
+      kickClient.ws.close(1000, 'Kicked by room creator');
+      clients.delete(kickClientId);
+      break;
+    }
+  }
+
+  await broadcastRoomUpdate(roomId);
+}
+
 async function broadcastRoomUpdate(roomId: string) {
   const room = await storage.getRoom(roomId);
   if (!room) return;

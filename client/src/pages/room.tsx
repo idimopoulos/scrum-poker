@@ -43,7 +43,7 @@ export default function Room() {
     enabled: !!roomId,
   });
 
-  const { isConnected, usePolling, roomState, sendVote, revealVotes, nextRound } = useWebSocket(
+  const { isConnected, usePolling, roomState, sendVote, revealVotes, nextRound, ws } = useWebSocket(
     roomId || null,
     participant?.id || null
   );
@@ -129,6 +129,18 @@ export default function Room() {
     nextRound(nextRoundDescription);
     if (clearDescriptionOnNextRound) {
       setNextRoundDescription("");
+    }
+  };
+
+  const handleKickParticipant = (participantId: string) => {
+    if (ws && participant?.isCreator && room) {
+      ws.send({
+        type: 'kick_participant',
+        payload: {
+          roomId: room.id,
+          participantId
+        }
+      });
     }
   };
 

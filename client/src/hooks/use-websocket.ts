@@ -159,6 +159,7 @@ export function useWebSocket(roomId: string | null, participantId: string | null
     roomState,
     sendVote,
     revealVotes,
-    nextRound
-  };
+    nextRound,
+    ws: wsRef.current
+  } as const;
 }
