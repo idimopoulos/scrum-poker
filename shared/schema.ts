@@ -146,6 +146,14 @@ export interface NextRoundMessage extends WebSocketMessage {
   };
 }
 
+export interface KickParticipantMessage extends WebSocketMessage {
+  type: 'kick_participant';
+  payload: {
+    roomId: string;
+    participantId: string;
+  };
+}
+
 export interface RoomUpdateMessage extends WebSocketMessage {
   type: 'room_update';
   payload: {

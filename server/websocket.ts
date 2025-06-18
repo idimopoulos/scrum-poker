@@ -7,6 +7,7 @@ import type {
   VoteMessage, 
   RevealVotesMessage, 
   NextRoundMessage,
+  KickParticipantMessage,
   RoomUpdateMessage 
 } from '@shared/schema';
 
@@ -80,6 +81,10 @@ async function handleMessage(clientId: string, message: WebSocketMessage) {
     
     case 'next_round':
       await handleNextRound(clientId, message as NextRoundMessage);
+      break;
+    
+    case 'kick_participant':
+      await handleKickParticipant(clientId, message as KickParticipantMessage);
       break;
     
     default:

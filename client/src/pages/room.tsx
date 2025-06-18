@@ -371,6 +371,8 @@ export default function Room() {
                 dualVoting={room.dualVoting}
                 isRevealed={room.isRevealed}
                 votingProgress={votingProgress}
+                currentParticipant={participant}
+                onKickParticipant={handleKickParticipant}
               />
             </div>
 

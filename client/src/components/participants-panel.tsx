@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Check, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Check, Clock, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Participant, Vote } from "@shared/schema";
 
