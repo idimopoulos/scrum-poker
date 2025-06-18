@@ -163,66 +163,96 @@ export default function Home() {
               </div>
 
               {roomSettings.voteForStoryPoints && (
-                <div className="space-y-2">
-                  <Label htmlFor="story-system">Story Points System</Label>
-                  <Select
-                    value={roomSettings.storyPointsSystem}
-                    onValueChange={(value) => {
-                      const systems = {
-                        fibonacci: "1, 2, 3, 5, 8, 13, 21, ?",
-                        modified_fibonacci: "0, 1/2, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?",
-                        tshirt: "XS, S, M, L, XL, XXL, ?",
-                        powers_of_2: "1, 2, 4, 8, 16, 32, ?",
-                        linear: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
-                      };
-                      setRoomSettings({
-                        ...roomSettings,
-                        storyPointsSystem: value,
-                        storyPointsValues: systems[value as keyof typeof systems] || systems.fibonacci
-                      });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="fibonacci">Fibonacci</SelectItem>
-                      <SelectItem value="modified_fibonacci">Modified Fibonacci</SelectItem>
-                      <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
-                      <SelectItem value="powers_of_2">Powers of 2</SelectItem>
-                      <SelectItem value="linear">Linear</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="story-system">Story Points System</Label>
+                    <Select
+                      value={roomSettings.storyPointsSystem}
+                      onValueChange={(value) => {
+                        const systems = {
+                          fibonacci: "1, 2, 3, 5, 8, 13, 21, ?",
+                          modified_fibonacci: "0, 1/2, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?",
+                          tshirt: "XS, S, M, L, XL, XXL, ?",
+                          powers_of_2: "1, 2, 4, 8, 16, 32, ?",
+                          linear: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
+                        };
+                        setRoomSettings({
+                          ...roomSettings,
+                          storyPointsSystem: value,
+                          storyPointsValues: systems[value as keyof typeof systems] || systems.fibonacci
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fibonacci">Fibonacci</SelectItem>
+                        <SelectItem value="modified_fibonacci">Modified Fibonacci</SelectItem>
+                        <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
+                        <SelectItem value="powers_of_2">Powers of 2</SelectItem>
+                        <SelectItem value="linear">Linear</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="story-values">Story Points Values</Label>
+                    <Textarea
+                      id="story-values"
+                      value={roomSettings.storyPointsValues}
+                      onChange={(e) => setRoomSettings({ ...roomSettings, storyPointsValues: e.target.value })}
+                      placeholder="Enter values separated by commas (e.g., 1, 2, 3, 5, 8, 13, ?)"
+                      className="min-h-[60px] resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Customize voting values. Separate with commas. Use "?" for unknown.
+                    </p>
+                  </div>
                 </div>
               )}
 
               {roomSettings.voteForTime && (
-                <div className="space-y-2">
-                  <Label htmlFor="time-units">Time Units</Label>
-                  <Select
-                    value={roomSettings.timeUnits}
-                    onValueChange={(value) => {
-                      const units = {
-                        minutes: "5, 10, 15, 30, 45, 60, 90, 120, ?",
-                        hours: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
-                        days: "0.5, 1, 1.5, 2, 2.5, 3, 5, ?"
-                      };
-                      setRoomSettings({
-                        ...roomSettings,
-                        timeUnits: value,
-                        timeValues: units[value as keyof typeof units] || units.hours
-                      });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="minutes">Minutes</SelectItem>
-                      <SelectItem value="hours">Hours</SelectItem>
-                      <SelectItem value="days">Days</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="time-units">Time Units</Label>
+                    <Select
+                      value={roomSettings.timeUnits}
+                      onValueChange={(value) => {
+                        const units = {
+                          minutes: "5, 10, 15, 30, 45, 60, 90, 120, ?",
+                          hours: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
+                          days: "0.5, 1, 1.5, 2, 2.5, 3, 5, ?"
+                        };
+                        setRoomSettings({
+                          ...roomSettings,
+                          timeUnits: value,
+                          timeValues: units[value as keyof typeof units] || units.hours
+                        });
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="minutes">Minutes</SelectItem>
+                        <SelectItem value="hours">Hours</SelectItem>
+                        <SelectItem value="days">Days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="time-values">Time Estimation Values</Label>
+                    <Textarea
+                      id="time-values"
+                      value={roomSettings.timeValues}
+                      onChange={(e) => setRoomSettings({ ...roomSettings, timeValues: e.target.value })}
+                      placeholder="Enter time values separated by commas (e.g., 1, 2, 4, 8, 16, ?)"
+                      className="min-h-[60px] resize-none"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Customize time estimation values. Separate with commas. Use "?" for unknown.
+                    </p>
+                  </div>
                 </div>
               )}
 
