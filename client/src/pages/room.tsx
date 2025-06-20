@@ -75,10 +75,11 @@ export default function Room() {
       
       const urlParams = new URLSearchParams(window.location.search);
       const isCreator = urlParams.get("creator") === "true";
+      const creatorName = urlParams.get("name");
       
       if (isCreator) {
-        // If creator, create participant automatically
-        handleJoinRoom("Room Creator", true);
+        // If creator, create participant automatically with their chosen name
+        handleJoinRoom(creatorName || "Room Creator", true);
       } else {
         // Show join modal for others
         setShowJoinModal(true);

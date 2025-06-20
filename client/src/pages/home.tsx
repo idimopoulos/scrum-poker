@@ -65,7 +65,7 @@ export default function Home() {
         title: "Room Created",
         description: `Room ${room.id} has been created successfully.`,
       });
-      setLocation(`/room/${room.id}?creator=true`);
+      setLocation(`/room/${room.id}?creator=true&name=${encodeURIComponent(roomSettings.creatorName)}`);
     },
     onError: (error) => {
       toast({
