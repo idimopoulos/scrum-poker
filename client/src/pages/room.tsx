@@ -43,9 +43,25 @@ export default function Room() {
     enabled: !!roomId,
   });
 
+  const handleKicked = () => {
+    // Clear participant state
+    setParticipant(null);
+    
+    // Show toast notification
+    toast({
+      title: "Removed from Room",
+      description: "You have been removed from the room by the room creator.",
+      variant: "destructive",
+    });
+    
+    // Show join modal to allow rejoin
+    setShowJoinModal(true);
+  };
+
   const { isConnected, usePolling, roomState, sendVote, revealVotes, nextRound, ws } = useWebSocket(
     roomId || null,
-    participant?.id || null
+    participant?.id || null,
+    { onKicked: handleKicked }
   );
 
   useEffect(() => {
@@ -60,9 +76,9 @@ export default function Room() {
     }
 
     if (roomData && !participant) {
-      // Check if participant is stored in sessionStorage
-      const storedParticipantId = sessionStorage.getItem(`participant_${roomId}`);
-      const storedParticipantName = sessionStorage.getItem(`participant_name_${roomId}`);
+      // Check if participant is stored in localStorage
+      const storedParticipantId = localStorage.getItem(`participant_${roomId}`);
+      const storedParticipantName = localStorage.getItem(`participant_name_${roomId}`);
       
       if (storedParticipantId && storedParticipantName && roomData && roomData.participants) {
         // Find existing participant in room data
@@ -95,21 +111,42 @@ export default function Room() {
 
   const handleJoinRoom = async (name: string, isCreator: boolean = false) => {
     try {
-      const response = await apiRequest("POST", `/api/rooms/${roomId}/join`, { name, isCreator });
+      // Check for existing participant ID in localStorage for session persistence
+      const storedParticipantId = localStorage.getItem(`participant_${roomId}`);
+      
+      const response = await apiRequest("POST", `/api/rooms/${roomId}/join`, { 
+        name, 
+        isCreator,
+        participantId: storedParticipantId // Send stored ID for rehydration
+      });
       const data = await response.json();
-      const newParticipant = data.participant || data; // Handle both response formats
+      const newParticipant = data.participant || data;
+      
+      // Clear localStorage if this is a new participant (not rehydrated)
+      // This handles the case where a kicked user rejoins with a new identity
+      if (!data.rehydrated && storedParticipantId) {
+        localStorage.removeItem(`participant_${roomId}`);
+        localStorage.removeItem(`participant_name_${roomId}`);
+      }
+      
       setParticipant(newParticipant);
       setShowJoinModal(false);
       
-      // Store participant info in sessionStorage to prevent duplicates on refresh
-      sessionStorage.setItem(`participant_${roomId}`, newParticipant.id);
-      sessionStorage.setItem(`participant_name_${roomId}`, newParticipant.name);
+      // Store participant info in localStorage to persist across sessions
+      localStorage.setItem(`participant_${roomId}`, newParticipant.id);
+      localStorage.setItem(`participant_name_${roomId}`, newParticipant.name);
       
       toast({
-        title: "Joined Room",
-        description: `Welcome to the planning session, ${name}!`,
+        title: data.rehydrated ? "Rejoined Room" : "Joined Room",
+        description: data.rehydrated 
+          ? `Welcome back, ${newParticipant.name}!` 
+          : `Welcome to the planning session, ${name}!`,
       });
     } catch (error) {
+      // Clear localStorage on join failure
+      localStorage.removeItem(`participant_${roomId}`);
+      localStorage.removeItem(`participant_name_${roomId}`);
+      
       toast({
         title: "Error",
         description: "Failed to join room. Please try again.",

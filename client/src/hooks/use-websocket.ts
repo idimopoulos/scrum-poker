@@ -9,7 +9,15 @@ interface RoomState {
   history: VotingHistory[];
 }
 
-export function useWebSocket(roomId: string | null, participantId: string | null) {
+interface UseWebSocketOptions {
+  onKicked?: () => void;
+}
+
+export function useWebSocket(
+  roomId: string | null, 
+  participantId: string | null,
+  options?: UseWebSocketOptions
+) {
   const wsRef = useRef<WebSocketClient | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [usePolling, setUsePolling] = useState(false);
@@ -44,6 +52,23 @@ export function useWebSocket(roomId: string | null, participantId: string | null
 
     ws.on('error', (payload) => {
       console.error('WebSocket error:', payload.message);
+    });
+
+    ws.on('close', (payload) => {
+      setIsConnected(false);
+      
+      // Check if participant was kicked
+      if (payload.code === 1000 && payload.reason.includes('Kicked')) {
+        console.log('Participant was kicked from the room');
+        
+        // Don't clear localStorage immediately - defer until explicit rejoin
+        // This allows the user to attempt rehydration if the kick was accidental
+        
+        // Notify parent component
+        if (options?.onKicked) {
+          options.onKicked();
+        }
+      }
     });
 
     ws.connect()

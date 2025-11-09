@@ -109,6 +109,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Room not found" });
       }
 
+      // Check if participantId is provided for session persistence
+      const existingParticipantId = req.body.participantId;
+      
+      if (existingParticipantId) {
+        // Try to find existing participant
+        const participants = await storage.getParticipantsByRoom(req.params.id);
+        const existingParticipant = participants.find(p => p.id === existingParticipantId);
+        
+        if (existingParticipant) {
+          // Participant exists, rehydrate the session
+          return res.json({ participant: existingParticipant, room, rehydrated: true });
+        }
+        // Participant not found (server restart or removed), continue to create new one
+      }
+
+      // Create new participant
       const participantData = {
         id: `participant-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
         name: req.body.name || "Anonymous",
@@ -119,7 +135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedParticipant = insertParticipantSchema.parse(participantData);
       const participant = await storage.createParticipant(validatedParticipant);
       
-      res.json({ participant, room });
+      res.json({ participant, room, rehydrated: false });
     } catch (error) {
       res.status(400).json({ message: "Failed to join room", error });
     }

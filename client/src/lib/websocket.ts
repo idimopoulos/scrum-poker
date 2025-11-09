@@ -32,8 +32,21 @@ export class WebSocketClient {
           }
         };
 
-        this.ws.onclose = () => {
-          console.log('WebSocket disconnected');
+        this.ws.onclose = (event) => {
+          console.log('WebSocket disconnected', event.code, event.reason);
+          
+          // Notify close handlers
+          const closeHandler = this.messageHandlers.get('close');
+          if (closeHandler) {
+            closeHandler({ code: event.code, reason: event.reason });
+          }
+          
+          // Don't reconnect if kicked (code 1000 with "Kicked" in reason)
+          if (event.code === 1000 && event.reason.includes('Kicked')) {
+            console.log('Participant was kicked, not attempting to reconnect');
+            return;
+          }
+          
           this.handleReconnect();
         };
 
