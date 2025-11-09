@@ -93,15 +93,18 @@ export default function Room() {
       const isCreator = urlParams.get("creator") === "true";
       const creatorName = urlParams.get("name");
       
-      if (isCreator) {
+      if (isCreator && creatorName) {
         // If creator, create participant automatically with their chosen name
-        handleJoinRoom(creatorName || "Room Creator", true);
+        handleJoinRoom(creatorName, true);
+        
+        // Remove URL parameters to prevent duplicate joins when URL is shared
+        window.history.replaceState({}, '', `/room/${roomId}`);
       } else {
         // Show join modal for others
         setShowJoinModal(true);
       }
     }
-  }, [roomData, error, participant]);
+  }, [roomData, error, participant, roomId]);
 
   useEffect(() => {
     if (roomState.room) {
