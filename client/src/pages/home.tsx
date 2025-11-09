@@ -38,7 +38,7 @@ export default function Home() {
     storyPointsSystem: "fibonacci",
     storyPointsValues: "1, 2, 3, 5, 8, 13, 21, ?",
     timeUnits: "hours",
-    timeValues: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
+    timeValues: "1, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, ?",
     autoReveal: false,
   });
 
