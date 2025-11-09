@@ -1,10 +1,22 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -39,23 +51,31 @@ export default function Home() {
     storyPointsValues: "1, 2, 3, 5, 8, 13, 21, ?",
     timeUnits: "hours",
     timeValues: "1, 2, 4, 6, 8, 12, 16, 20, 24, 32, 40, ?",
-    autoReveal: false,
+    autoReveal: true,
   });
 
   const createRoomMutation = useMutation({
     mutationFn: async (settings: RoomSettings) => {
       const backendSettings = {
         name: settings.name,
-        votingSystem: settings.voteForStoryPoints ? settings.storyPointsSystem : "fibonacci",
+        votingSystem: settings.voteForStoryPoints
+          ? settings.storyPointsSystem
+          : "fibonacci",
         timeUnits: settings.voteForTime ? settings.timeUnits : "hours",
         dualVoting: settings.voteForStoryPoints && settings.voteForTime,
         autoReveal: settings.autoReveal,
-        storyPointValues: settings.voteForStoryPoints 
-          ? settings.storyPointsValues.split(',').map(v => v.trim()).filter(v => v)
+        storyPointValues: settings.voteForStoryPoints
+          ? settings.storyPointsValues
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v)
           : [],
-        timeValues: settings.voteForTime 
-          ? settings.timeValues.split(',').map(v => v.trim()).filter(v => v)
-          : []
+        timeValues: settings.voteForTime
+          ? settings.timeValues
+              .split(",")
+              .map((v) => v.trim())
+              .filter((v) => v)
+          : [],
       };
       const response = await apiRequest("POST", "/api/rooms", backendSettings);
       return response.json();
@@ -65,7 +85,9 @@ export default function Home() {
         title: "Room Created",
         description: `Room ${room.id} has been created successfully.`,
       });
-      setLocation(`/room/${room.id}?creator=true&name=${encodeURIComponent(roomSettings.creatorName)}`);
+      setLocation(
+        `/room/${room.id}?creator=true&name=${encodeURIComponent(roomSettings.creatorName)}`,
+      );
     },
     onError: (error) => {
       toast({
@@ -97,7 +119,9 @@ export default function Home() {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-white text-lg">🃏</span>
               </div>
-              <h1 className="text-xl font-semibold text-slate-800">Scrum Poker</h1>
+              <h1 className="text-xl font-semibold text-slate-800">
+                Scrum Poker
+              </h1>
             </div>
           </div>
         </div>
@@ -110,8 +134,9 @@ export default function Home() {
             <span className="text-primary"> Estimate Smarter</span>
           </h1>
           <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Real-time Scrum poker for agile teams. Streamline your planning sessions with 
-            collaborative estimation, dual voting systems, and comprehensive analytics.
+            Real-time Scrum poker for agile teams. Streamline your planning
+            sessions with collaborative estimation, dual voting systems, and
+            comprehensive analytics.
           </p>
         </div>
 
@@ -133,7 +158,9 @@ export default function Home() {
                 <Input
                   id="room-name"
                   value={roomSettings.name}
-                  onChange={(e) => setRoomSettings({ ...roomSettings, name: e.target.value })}
+                  onChange={(e) =>
+                    setRoomSettings({ ...roomSettings, name: e.target.value })
+                  }
                   placeholder="Enter room name"
                 />
               </div>
@@ -143,7 +170,12 @@ export default function Home() {
                 <Input
                   id="creator-name"
                   value={roomSettings.creatorName}
-                  onChange={(e) => setRoomSettings({ ...roomSettings, creatorName: e.target.value })}
+                  onChange={(e) =>
+                    setRoomSettings({
+                      ...roomSettings,
+                      creatorName: e.target.value,
+                    })
+                  }
                   placeholder="Enter your name"
                 />
               </div>
@@ -156,7 +188,10 @@ export default function Home() {
                       id="story-points"
                       checked={roomSettings.voteForStoryPoints}
                       onCheckedChange={(checked) =>
-                        setRoomSettings({ ...roomSettings, voteForStoryPoints: checked as boolean })
+                        setRoomSettings({
+                          ...roomSettings,
+                          voteForStoryPoints: checked as boolean,
+                        })
                       }
                     />
                     <Label htmlFor="story-points">Vote for Story Points</Label>
@@ -166,10 +201,15 @@ export default function Home() {
                       id="time-estimate"
                       checked={roomSettings.voteForTime}
                       onCheckedChange={(checked) =>
-                        setRoomSettings({ ...roomSettings, voteForTime: checked as boolean })
+                        setRoomSettings({
+                          ...roomSettings,
+                          voteForTime: checked as boolean,
+                        })
                       }
                     />
-                    <Label htmlFor="time-estimate">Vote for Time Estimate</Label>
+                    <Label htmlFor="time-estimate">
+                      Vote for Time Estimate
+                    </Label>
                   </div>
                 </div>
               </div>
@@ -183,15 +223,18 @@ export default function Home() {
                       onValueChange={(value) => {
                         const systems = {
                           fibonacci: "1, 2, 3, 5, 8, 13, 21, ?",
-                          modified_fibonacci: "0, 1/2, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?",
+                          modified_fibonacci:
+                            "0, 1/2, 1, 2, 3, 5, 8, 13, 20, 40, 100, ?",
                           tshirt: "XS, S, M, L, XL, XXL, ?",
                           powers_of_2: "1, 2, 4, 8, 16, 32, ?",
-                          linear: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?"
+                          linear: "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ?",
                         };
                         setRoomSettings({
                           ...roomSettings,
                           storyPointsSystem: value,
-                          storyPointsValues: systems[value as keyof typeof systems] || systems.fibonacci
+                          storyPointsValues:
+                            systems[value as keyof typeof systems] ||
+                            systems.fibonacci,
                         });
                       }}
                     >
@@ -200,7 +243,9 @@ export default function Home() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="fibonacci">Fibonacci</SelectItem>
-                        <SelectItem value="modified_fibonacci">Modified Fibonacci</SelectItem>
+                        <SelectItem value="modified_fibonacci">
+                          Modified Fibonacci
+                        </SelectItem>
                         <SelectItem value="tshirt">T-Shirt Sizes</SelectItem>
                         <SelectItem value="powers_of_2">Powers of 2</SelectItem>
                         <SelectItem value="linear">Linear</SelectItem>
@@ -212,12 +257,18 @@ export default function Home() {
                     <Textarea
                       id="story-values"
                       value={roomSettings.storyPointsValues}
-                      onChange={(e) => setRoomSettings({ ...roomSettings, storyPointsValues: e.target.value })}
+                      onChange={(e) =>
+                        setRoomSettings({
+                          ...roomSettings,
+                          storyPointsValues: e.target.value,
+                        })
+                      }
                       placeholder="Enter values separated by commas (e.g., 1, 2, 3, 5, 8, 13, ?)"
                       className="min-h-[60px] resize-none"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Customize voting values. Separate with commas. Use "?" for unknown.
+                      Customize voting values. Separate with commas. Use "?" for
+                      unknown.
                     </p>
                   </div>
                 </div>
@@ -233,12 +284,13 @@ export default function Home() {
                         const units = {
                           minutes: "5, 10, 15, 30, 45, 60, 90, 120, ?",
                           hours: "1, 2, 4, 8, 12, 16, 20, 24, 32, 40, ?",
-                          days: "0.5, 1, 1.5, 2, 2.5, 3, 5, ?"
+                          days: "0.5, 1, 1.5, 2, 2.5, 3, 5, ?",
                         };
                         setRoomSettings({
                           ...roomSettings,
                           timeUnits: value,
-                          timeValues: units[value as keyof typeof units] || units.hours
+                          timeValues:
+                            units[value as keyof typeof units] || units.hours,
                         });
                       }}
                     >
@@ -257,12 +309,18 @@ export default function Home() {
                     <Textarea
                       id="time-values"
                       value={roomSettings.timeValues}
-                      onChange={(e) => setRoomSettings({ ...roomSettings, timeValues: e.target.value })}
+                      onChange={(e) =>
+                        setRoomSettings({
+                          ...roomSettings,
+                          timeValues: e.target.value,
+                        })
+                      }
                       placeholder="Enter time values separated by commas (e.g., 1, 2, 4, 8, 16, ?)"
                       className="min-h-[60px] resize-none"
                     />
                     <p className="text-xs text-muted-foreground">
-                      Customize time estimation values. Separate with commas. Use "?" for unknown.
+                      Customize time estimation values. Separate with commas.
+                      Use "?" for unknown.
                     </p>
                   </div>
                 </div>
@@ -276,7 +334,9 @@ export default function Home() {
                     setRoomSettings({ ...roomSettings, autoReveal: checked })
                   }
                 />
-                <Label htmlFor="auto-reveal">Auto-reveal votes when everyone has voted</Label>
+                <Label htmlFor="auto-reveal">
+                  Auto-reveal votes when everyone has voted
+                </Label>
               </div>
 
               <Button
@@ -306,7 +366,9 @@ export default function Home() {
                   <Input
                     id="room-id"
                     value={joinRoomId}
-                    onChange={(e) => setJoinRoomId(e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      setJoinRoomId(e.target.value.toUpperCase())
+                    }
                     placeholder="Enter room ID (e.g., ABC123)"
                     className="uppercase"
                   />
@@ -323,22 +385,33 @@ export default function Home() {
               <Card>
                 <CardContent className="p-4 text-center">
                   <Users className="h-8 w-8 text-primary mx-auto mb-2" />
-                  <h3 className="font-semibold mb-1">Real-time Collaboration</h3>
-                  <p className="text-sm text-slate-600">Collaborate with your team in real-time with instant vote synchronization.</p>
+                  <h3 className="font-semibold mb-1">
+                    Real-time Collaboration
+                  </h3>
+                  <p className="text-sm text-slate-600">
+                    Collaborate with your team in real-time with instant vote
+                    synchronization.
+                  </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-4 text-center">
                   <Clock className="h-8 w-8 text-primary mx-auto mb-2" />
                   <h3 className="font-semibold mb-1">Dual Voting System</h3>
-                  <p className="text-sm text-slate-600">Estimate both story points and time for comprehensive planning.</p>
+                  <p className="text-sm text-slate-600">
+                    Estimate both story points and time for comprehensive
+                    planning.
+                  </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-4 text-center">
                   <BarChart3 className="h-8 w-8 text-primary mx-auto mb-2" />
                   <h3 className="font-semibold mb-1">Analytics & History</h3>
-                  <p className="text-sm text-slate-600">Track estimation accuracy with detailed voting history and statistics.</p>
+                  <p className="text-sm text-slate-600">
+                    Track estimation accuracy with detailed voting history and
+                    statistics.
+                  </p>
                 </CardContent>
               </Card>
             </div>
