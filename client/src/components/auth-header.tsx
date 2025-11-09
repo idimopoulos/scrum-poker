@@ -1,10 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { LogIn, LogOut, User } from "lucide-react";
+import { LogIn, LogOut, User, DoorOpen } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
-export default function AuthHeader() {
+interface AuthHeaderProps {
+  mode?: 'default' | 'room';
+  roomId?: string;
+  onLeave?: () => void;
+}
+
+export default function AuthHeader({ mode = 'default', roomId, onLeave }: AuthHeaderProps = {}) {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
@@ -50,11 +56,27 @@ export default function AuthHeader() {
       <Button
         variant="outline"
         size="sm"
-        onClick={() => window.location.href = '/api/logout'}
+        onClick={() => {
+          if (mode === 'room' && onLeave) {
+            onLeave();
+          } else {
+            window.location.href = '/api/logout';
+          }
+        }}
         className="flex items-center space-x-2"
+        data-testid="button-leave-room"
       >
-        <LogOut className="h-4 w-4" />
-        <span className="hidden sm:inline">Sign Out</span>
+        {mode === 'room' ? (
+          <>
+            <DoorOpen className="h-4 w-4" />
+            <span className="hidden sm:inline">Leave Room</span>
+          </>
+        ) : (
+          <>
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </>
+        )}
       </Button>
     </div>
   );

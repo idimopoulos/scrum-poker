@@ -58,6 +58,17 @@ export default function Room() {
     setShowJoinModal(true);
   };
 
+  const handleLeaveRoom = () => {
+    // Clear localStorage for this room
+    if (roomId) {
+      localStorage.removeItem(`participant_${roomId}`);
+      localStorage.removeItem(`participant_name_${roomId}`);
+    }
+    
+    // Navigate to home page
+    setLocation('/');
+  };
+
   const { isConnected, usePolling, roomState, sendVote, revealVotes, nextRound, ws } = useWebSocket(
     roomId || null,
     participant?.id || null,
@@ -310,7 +321,11 @@ export default function Room() {
                   <span className="hidden sm:inline">Share Room</span>
                 </Button>
                 
-                <AuthHeader />
+                <AuthHeader 
+                  mode="room"
+                  roomId={roomId}
+                  onLeave={handleLeaveRoom}
+                />
               </div>
             </div>
           </div>
