@@ -48,6 +48,13 @@ This is a real-time Scrum Poker web application built for agile teams to collabo
 - **Time Units**: Minutes, hours, and days with configurable value sets
 - **Statistics**: Real-time calculation of averages, min/max values, and participation rates
 
+### Session Persistence
+- **localStorage Integration**: Participant identity persists across browser sessions using localStorage
+- **Automatic Rehydration**: When returning to a room, participants are automatically reconnected with their existing identity
+- **Duplicate Prevention**: Page refreshes and browser close/reopen scenarios do not create duplicate participants
+- **Server Restart Handling**: If the server restarts and in-memory data is cleared, new participants are created seamlessly
+- **Kick Handling**: When a participant is kicked, their localStorage is preserved until they explicitly rejoin, allowing recovery from accidental kicks
+
 ## Data Flow
 
 1. **Room Creation**: User creates room with voting configuration → Server generates unique room ID → Room stored in memory
@@ -104,6 +111,7 @@ This is a real-time Scrum Poker web application built for agile teams to collabo
 
 ```
 Changelog:
+- November 09, 2025. Implemented session persistence with localStorage to prevent duplicate participants on page refresh and browser reopen
 - July 08, 2025. Initial setup
 ```
 
