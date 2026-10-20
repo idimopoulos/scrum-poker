@@ -64,7 +64,7 @@ export default function VotingCards({ room, currentVote, onVote, isRevealed }: V
       
       {/* Story Points Cards */}
       <div className="mb-4">
-        <div className="flex items-center gap-1 mb-2">
+        <div className="flex items-center gap-2 mb-2">
           <h4 className="text-xs font-medium text-slate-600 uppercase tracking-wide">
             Story Points
           </h4>
@@ -72,10 +72,10 @@ export default function VotingCards({ room, currentVote, onVote, isRevealed }: V
             <PopoverTrigger asChild>
               <button
                 type="button"
-                aria-label="What do story points mean?"
-                className="text-slate-400 hover:text-primary transition-colors"
+                className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-xs font-medium text-primary hover:bg-blue-100 transition-colors"
               >
                 <Info className="h-3.5 w-3.5" />
+                What do points mean?
               </button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-80 text-sm">
