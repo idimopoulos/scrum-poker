@@ -1,5 +1,5 @@
 # Multi-stage build for production optimization
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -27,7 +27,7 @@ RUN if [ -d "dist/public" ] && [ "$(ls -A dist/public)" ]; then cp -r dist/publi
 RUN ls -la /app/dist-static/
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:24-alpine AS production
 
 # Set working directory
 WORKDIR /app
