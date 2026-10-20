@@ -3,35 +3,72 @@ import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { Room, Vote } from "@shared/schema";
 
-const TSHIRT_MEANINGS: Record<string, string> = {
-  XS: "Trivial: well understood, no unknowns",
-  S: "Small: clear approach, little risk",
-  M: "Medium: some unknowns or touches several parts",
-  L: "Large: notable uncertainty or cross-cutting",
-  XL: "Very large: consider splitting",
-  XXL: "Too big or unclear: split or spike first",
+interface StoryPointMeaning {
+  label: string;
+  description: string;
+}
+
+const MEANINGS = {
+  none: { label: "No effort", description: "Already done or nothing to change." },
+  noBrainer: { label: "No brainer", description: "E.g. fixing a typo." },
+  trivial: {
+    label: "Trivial",
+    description:
+      "The smallest task that still needs some code, e.g. typecast a string or add an attribute to a class.",
+  },
+  normal: {
+    label: "Normal",
+    description:
+      "A usual task we already know how to do, e.g. add a new vocabulary or a new formatter.",
+  },
+  difficult: {
+    label: "Difficult",
+    description:
+      "Some constraints make it a bit painful, or there is some uncertainty, e.g. working on functionality you are not familiar with.",
+  },
+  risky: {
+    label: "Risky",
+    description: "More difficult than the previous, or higher uncertainty, so it carries some risk.",
+  },
+  veryDifficult: {
+    label: "Very difficult",
+    description:
+      "A very high amount of complexity, usually more than one complexity in the same task, e.g. implement a new API.",
+  },
+  extreme: { label: "Extreme", description: "Reinvent Google." },
+  unknown: { label: "Unknown", description: "Not enough information to estimate." },
+} satisfies Record<string, StoryPointMeaning>;
+
+const TSHIRT_MEANINGS: Record<string, StoryPointMeaning> = {
+  XS: MEANINGS.noBrainer,
+  S: MEANINGS.trivial,
+  M: MEANINGS.normal,
+  L: MEANINGS.difficult,
+  XL: MEANINGS.risky,
+  XXL: MEANINGS.veryDifficult,
 };
 
-function storyPointMeaning(value: string): string | undefined {
-  if (value === "?") return "Not enough information to estimate";
+function storyPointMeaning(value: string): StoryPointMeaning | undefined {
+  if (value === "?") return MEANINGS.unknown;
   if (TSHIRT_MEANINGS[value]) return TSHIRT_MEANINGS[value];
 
   const [numerator, denominator] = value.split("/").map(Number);
   const points = denominator ? numerator / denominator : numerator;
   if (Number.isNaN(points)) return undefined;
 
-  if (points === 0) return "No effort: already done or a trivial tweak";
-  if (points <= 1) return TSHIRT_MEANINGS.XS;
-  if (points <= 3) return TSHIRT_MEANINGS.S;
-  if (points <= 5) return TSHIRT_MEANINGS.M;
-  if (points <= 8) return TSHIRT_MEANINGS.L;
-  if (points <= 13) return TSHIRT_MEANINGS.XL;
-  return TSHIRT_MEANINGS.XXL;
+  if (points === 0) return MEANINGS.none;
+  if (points <= 1) return MEANINGS.noBrainer;
+  if (points <= 2) return MEANINGS.trivial;
+  if (points <= 3) return MEANINGS.normal;
+  if (points <= 5) return MEANINGS.difficult;
+  if (points <= 8) return MEANINGS.risky;
+  if (points <= 13) return MEANINGS.veryDifficult;
+  return MEANINGS.extreme;
 }
 
-// Groups consecutive values that share a meaning, e.g. "2, 3" -> Small.
+// Groups consecutive values that share a meaning, e.g. "20, 40, 100" -> Extreme.
 function storyPointLegend(values: string[]) {
-  const rows: { values: string[]; meaning: string }[] = [];
+  const rows: { values: string[]; meaning: StoryPointMeaning }[] = [];
   for (const value of values) {
     const meaning = storyPointMeaning(value);
     if (!meaning) continue;
@@ -78,7 +115,7 @@ export default function VotingCards({ room, currentVote, onVote, isRevealed }: V
                 What do points mean?
               </button>
             </PopoverTrigger>
-            <PopoverContent align="start" className="w-80 text-sm">
+            <PopoverContent align="start" className="w-[min(26rem,calc(100vw-2rem))] text-sm">
               <p className="font-medium text-slate-800 mb-1">What story points mean</p>
               <p className="text-slate-600 mb-3">
                 Story points measure the relative complexity, effort and uncertainty of a
@@ -91,7 +128,10 @@ export default function VotingCards({ room, currentVote, onVote, isRevealed }: V
                     <dt className="w-16 shrink-0 font-semibold text-slate-800">
                       {row.values.join(", ")}
                     </dt>
-                    <dd className="text-slate-600">{row.meaning}</dd>
+                    <dd className="text-slate-600">
+                      <span className="font-medium text-slate-800">{row.meaning.label}:</span>{" "}
+                      {row.meaning.description}
+                    </dd>
                   </div>
                 ))}
               </dl>
