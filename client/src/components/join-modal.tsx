@@ -38,6 +38,7 @@ export default function JoinModal({ isOpen, onClose, onJoin, roomId }: JoinModal
             <Label className="text-sm text-slate-600 block mb-2">Your Name</Label>
             <Input
               value={name}
+              autoComplete="off"
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               required

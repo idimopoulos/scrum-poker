@@ -157,6 +157,7 @@ export default function Home() {
                 <Label htmlFor="room-name">Room Name</Label>
                 <Input
                   id="room-name"
+                  autoComplete="off"
                   value={roomSettings.name}
                   onChange={(e) =>
                     setRoomSettings({ ...roomSettings, name: e.target.value })
@@ -169,6 +170,7 @@ export default function Home() {
                 <Label htmlFor="creator-name">Your Name</Label>
                 <Input
                   id="creator-name"
+                  autoComplete="off"
                   value={roomSettings.creatorName}
                   onChange={(e) =>
                     setRoomSettings({
@@ -365,6 +367,7 @@ export default function Home() {
                   <Label htmlFor="room-id">Room ID</Label>
                   <Input
                     id="room-id"
+                    autoComplete="off"
                     value={joinRoomId}
                     onChange={(e) =>
                       setJoinRoomId(e.target.value.toUpperCase())
