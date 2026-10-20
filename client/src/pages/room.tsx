@@ -401,6 +401,7 @@ export default function Room() {
                             </Label>
                             <Input
                               id="task-description"
+                              autoComplete="off"
                               value={nextRoundDescription}
                               onChange={(e) => setNextRoundDescription(e.target.value)}
                               placeholder="Enter task description for next round"
